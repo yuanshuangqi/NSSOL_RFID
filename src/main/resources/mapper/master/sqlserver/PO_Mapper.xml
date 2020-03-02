@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nssol.dao.master.PODao">
+	
+	<select id="getPOBagging" resultType="com.nssol.web.dataanalytics.model.POInfo"
+			parameterType="com.nssol.web.dataanalytics.controller.po.PORequest">
+		SELECT
+			tpi.orderNo AS orderNo,
+			tpi.ContractedETD AS ETD,
+			isnull(tod.orderQty,0)AS orderQty ,
+			isnull(tb.scanNum,0)AS scanNum
+		FROM  T_PO_INFO tpi
+		LEFT JOIN (select OrderNo,sum(OrderQty_Pcs) AS orderQty FROM T_ORDER_DETAIL group by OrderNo)tod
+		ON tpi.OrderNo = tod.OrderNo
+		LEFT JOIN (select OrderNo,sum(scanNum) AS scanNum from t_bagging group by OrderNo) tb
+		ON tb.OrderNo = tpi.OrderNo
+		WHERE tpi.ContractedETD is not null
+			AND tpi.ContractedETD != ''
+		<if test="orderNo != null and orderNo != ''">
+			AND tpi.OrderNo LIKE CONCAT('%',#{orderNo},'%')
+		</if>
+		<if test="dateFrom != null and dateFrom != ''">
+			AND tpi.ContractedETD <![CDATA[>=]]> #{dateFrom}
+		</if>
+		<if test="dateTo != null and dateTo != ''">
+			AND tpi.ContractedETD <![CDATA[<=]]> #{dateTo}
+		</if>
+	</select>
+
+	<select id="getPOTagging" resultType="com.nssol.web.dataanalytics.model.POInfo"
+			parameterType="com.nssol.web.dataanalytics.controller.po.PORequest">
+		SELECT
+		tpi.orderNo AS orderNo,
+		tpi.ContractedETD AS ETD,
+		isnull(tod.orderQty,0)AS orderQty ,
+		isnull(tt.scanNum,0)AS scanNum
+		FROM  T_PO_INFO tpi
+		LEFT JOIN (select OrderNo,sum(OrderQty_Pcs) AS orderQty FROM T_ORDER_DETAIL group by OrderNo)tod
+		ON tpi.OrderNo = tod.OrderNo
+		LEFT JOIN (select OrderNo,sum(scanNum) AS scanNum from t_tagging group by OrderNo) tt
+		ON tt.OrderNo = tpi.OrderNo
+		WHERE tpi.ContractedETD is not null
+		AND tpi.ContractedETD != ''
+		<if test="orderNo != null and orderNo != ''">
+			AND tpi.OrderNo LIKE CONCAT('%',#{orderNo},'%')
+		</if>
+		<if test="dateFrom != null and dateFrom != ''">
+			AND tpi.ContractedETD <![CDATA[>=]]> #{dateFrom}
+		</if>
+		<if test="dateTo != null and dateTo != ''">
+			AND tpi.ContractedETD <![CDATA[<=]]> #{dateTo}
+		</if>
+	</select>
+
+	<select id="getPOMetalCheck" resultType="com.nssol.web.dataanalytics.model.POInfo"
+			parameterType="com.nssol.web.dataanalytics.controller.po.PORequest">
+		SELECT
+		tpi.orderNo AS orderNo,
+		tpi.ContractedETD AS ETD,
+		isnull(tod.orderQty,0)AS orderQty ,
+		isnull(tm.scanNum,0)AS scanNum
+		FROM  T_PO_INFO tpi
+		LEFT JOIN (select OrderNo,sum(OrderQty_Pcs) AS orderQty FROM T_ORDER_DETAIL group by OrderNo)tod
+		ON tpi.OrderNo = tod.OrderNo
+		LEFT JOIN (select OrderNo,sum(scanNum) AS scanNum from T_Metalcheck group by OrderNo) tm
+		ON tm.OrderNo = tpi.OrderNo
+		WHERE tpi.ContractedETD is not null
+		AND tpi.ContractedETD != ''
+		<if test="orderNo != null and orderNo != ''">
+			AND tpi.OrderNo LIKE CONCAT('%',#{orderNo},'%')
+		</if>
+		<if test="dateFrom != null and dateFrom != ''">
+			AND tpi.ContractedETD <![CDATA[>=]]> #{dateFrom}
+		</if>
+		<if test="dateTo != null and dateTo != ''">
+			AND tpi.ContractedETD <![CDATA[<=]]> #{dateTo}
+		</if>
+	</select>
+
+	<select id="getRuleInfo" resultType="com.nssol.web.dataanalytics.model.RuleInfo"
+			parameterType="int">
+		SELECT
+			RuleCode AS ruleCode,
+			RuleName AS ruleName,
+			LessETD1 AS lessETD1,
+			LessETD2 AS lessETD2,
+			PercentQty AS percentQty
+		FROM M_RULE
+		WHERE RuleCode = #{ruleCode}
+
+	</select>
+</mapper>
+		

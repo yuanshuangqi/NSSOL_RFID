@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nssol.dao.master.TOrderDetailDao">
+	<resultMap id="BaseResultMap" type="com.nssol.model.TOrderDetail">
+		<id column="OrderNo" jdbcType="VARCHAR" property="orderNo" />
+		<result column="DetailNo" jdbcType="VARCHAR" property="detailNo" />
+		<result column="ColorCode" jdbcType="VARCHAR" property="colorCode" />
+		<result column="Color" jdbcType="VARCHAR" property="color" />
+		<result column="SizeCode" jdbcType="VARCHAR" property="sizeCode" />
+		<result column="Size" jdbcType="VARCHAR" property="size" />
+		<result column="PatternDimensionCode" jdbcType="VARCHAR" property="patternDimensionCode" />
+		<result column="SampleCode" jdbcType="VARCHAR" property="sampleCode" />
+		<result column="ItemBrand" jdbcType="VARCHAR" property="itemBrand" />
+		<result column="ItemCode" jdbcType="VARCHAR" property="itemCode" />
+		<result column="Item" jdbcType="VARCHAR" property="item" />
+		<result column="SKUCode" jdbcType="VARCHAR" property="skuCode" />
+		<result column="SKUCodeForShipping" jdbcType="VARCHAR" property="skuCodeForShipping" />
+		<result column="OrderQty_Pcs" jdbcType="DECIMAL" property="orderQty_Pcs" />
+		<result column="BusinessUnit" jdbcType="VARCHAR" property="businessUnit" />
+		<result column="ScanNum" jdbcType="INTEGER" property="scanNum" />
+		<result column="etd" jdbcType="INTEGER" property="etd" />
+		<result column="CreateTimeStart" jdbcType="VARCHAR" property="createTimeStart" />
+	</resultMap>
+	
+	<sql id="getLatelyPo">
+		<where>
+			1=1
+			 <if test="skuCode != null and skuCode != ''">
+                 AND D.SKUCode =#{skuCode}
+             </if>
+             <if test="orderNo != null and orderNo != ''">
+                 AND D.OrderNo =#{orderNo}
+             </if>
+		</where>
+	</sql>
+
+	<sql id="getLatelyActivePo">
+		<where>
+			datediff(P.ContractedETD,NOW()) >= 0
+			AND P.DocumentStatus != 'Finalized'
+			<if test="skuCode != null and skuCode != ''">
+				AND D.SKUCode =#{skuCode}
+			</if>
+			<if test="orderNo != null and orderNo != ''">
+				AND D.OrderNo =#{orderNo}
+			</if>
+		</where>
+	</sql>
+
+	<sql id="getLatelyExpiredPo">
+		<where>
+			datediff(NOW(),P.ContractedETD) > 0
+			AND P.DocumentStatus != 'Finalized'
+			<if test="skuCode != null and skuCode != ''">
+				AND D.SKUCode =#{skuCode}
+			</if>
+			<if test="orderNo != null and orderNo != ''">
+				AND D.OrderNo =#{orderNo}
+			</if>
+		</where>
+	</sql>
+	
+	<select id="selectByskuCode" parameterType="com.nssol.model.TOrderDetail"
+		resultMap="BaseResultMap">
+		select * FROM
+		(select * FROM
+		(select
+		D.OrderNo,
+		D.DetailNo,
+		D.ColorCode,
+		D.Color,
+		D.SizeCode,
+		D.Size,
+		D.PatternDimensionCode,
+		D.SampleCode,
+		P.ItemBrand,
+		D.ItemCode,
+		D.Item,
+		D.SKUCode,
+		D.SKUCodeForShipping,
+		D.OrderQty_Pcs,
+		P.BusinessUnit
+		FROM
+		T_ORDER_DETAIL D
+		INNER JOIN
+		T_PO_INFO P
+		on P.OrderNo=D.OrderNo
+		AND (P.IsDel is null OR P.IsDel = 0)
+		AND (D.IsDel is null OR D.IsDel = 0)
+		<include refid="getLatelyActivePo"/>ORDER BY datediff(P.ContractedETD,NOW()) ASC,D.DetailNo DESC
+		limit 1) a
+		UNION ALL
+		select * FROM
+		(select
+		D.OrderNo,
+		D.DetailNo,
+		D.ColorCode,
+		D.Color,
+		D.SizeCode,
+		D.Size,
+		D.PatternDimensionCode,
+		D.SampleCode,
+		P.ItemBrand,
+		D.ItemCode,
+		D.Item,
+		D.SKUCode,
+		D.SKUCodeForShipping,
+		D.OrderQty_Pcs,
+		P.BusinessUnit
+		FROM
+		T_ORDER_DETAIL D
+		INNER JOIN
+		T_PO_INFO P
+		on P.OrderNo=D.OrderNo
+		AND (P.IsDel is null OR P.IsDel = 0)
+		AND (D.IsDel is null OR D.IsDel = 0)
+		<include refid="getLatelyExpiredPo"/>
+		ORDER BY datediff(NOW(),P.ContractedETD) ASC,D.DetailNo DESC
+		limit 1) b) c
+		limit 1
+	</select>
+
+
+	<select id="selectSkuListByOrderNo" parameterType="com.nssol.model.TOrderDetail"
+		resultMap="BaseResultMap">
+		select 
+			D.OrderNo,
+			D.DetailNo,
+			D.ColorCode,
+			D.Color,
+			D.SizeCode,
+			D.Size,
+			D.PatternDimensionCode,
+			D.SampleCode,
+			P.ItemBrand,
+			D.ItemCode,
+			D.Item,
+			D.SKUCode,
+			D.SKUCodeForShipping,
+			D.OrderQty_Pcs,
+			P.BusinessUnit,
+			(SELECT SUM(C.ScanNum) 
+			FROM T_Metalcheck C 
+			WHERE  C.SkuCode= D.SkuCode AND C.OrderNo=D.OrderNo) ScanNum
+			FROM 
+			T_ORDER_DETAIL D
+		INNER JOIN 
+			T_PO_INFO P
+		on P.OrderNo=D.OrderNo
+		AND (P.IsDel is  null OR P.IsDel = 0)
+		AND (D.IsDel is  null OR D.IsDel = 0)
+		<include refid="getLatelyPo"/>
+		 order by P.ContractedETD DESC
+	</select>
+	
+	<select id="selectOrderDetailBysku" parameterType="com.nssol.model.TOrderDetail"
+		resultMap="BaseResultMap">
+		select 
+			P.OrderNo,
+			P.SampleCode,
+			D.DetailNo,
+			D.OrderQty_Pcs,
+			P.BusinessUnit,
+			P.ItemBrand,
+			CONCAT(D.ColorCode,':',D.Color) Color,
+			CONCAT(D.SizeCode,':',D.Size) Size,
+			DATE_FORMAT(P.ContractedETD,"%Y-%m-%d") etd,
+			(
+			    SELECT 
+			        IFNULL(SUM(M.ScanNum),0) 
+			    FROM 
+			        T_Metalcheck M 
+			    WHERE 
+			        M.OrderNo = D.OrderNo
+			        AND M.SKUCode = D.SKUCode
+			) AS ScanNum
+			FROM 
+			T_ORDER_DETAIL D
+		INNER JOIN  
+			T_PO_INFO P
+		on P.OrderNo=D.OrderNo
+		AND (P.IsDel is  null OR P.IsDel = 0)
+		AND (D.IsDel is  null OR D.IsDel = 0)
+		<include refid="getLatelyPo"/>
+		 order by P.ContractedETD DESC
+	</select>
+</mapper>

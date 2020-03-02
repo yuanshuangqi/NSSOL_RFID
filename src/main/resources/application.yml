@@ -1,0 +1,37 @@
+master: 
+  datasource:
+    url: jdbc:sqlserver://localhost:1433;DatabaseName=NSSOL_RFID_RAMATEX
+    username: sa
+    password: 123
+    driverClassName: com.microsoft.sqlserver.jdbc.SQLServerDriver
+#    url: jdbc:mysql://localhost:3306/nssol_rfid?serverTimezone=GMT%2B8&createDatabaseIfNotExist=true&useUnicode=true&characterEncoding=utf-8&useSSL=false&allowMultiQueries=true
+#    username: root
+#    password: 123456
+#    driverClassName: com.mysql.cj.jdbc.Driver
+cluster:
+  datasource:
+    url: jdbc:sqlserver://localhost:1433;DatabaseName=UNIQLO
+    username: sa
+    password: 123
+    driverClassName: com.microsoft.sqlserver.jdbc.SQLServerDriver
+spring: 
+  messages:
+    basename: i18n/messages
+  session:
+    store-type: none
+
+server:
+   port: 8111
+versionUpdatePath: D:\NSSOL_RFID\UpdatePC
+logPath: D:\NSSOL_RFID_LOG\Client
+licenseKey: 52B6B0FF8A02BB2680C87D575657A633FB920B7E391AF059A30AE0F3FC729F5B
+  #52B6B0FF8A02BB2680C87D575657A633FB920B7E391AF059A30AE0F3FC729F5B
+#2020-04-01期限的Lincense  DC8A24B1D57102C409353284E052713995C765AD64D33AC5EA330AE4B0217DA2
+#2019-05-31期限的Lincenes  C8E1AE188DB3088A6AE5CD34D288082E95C765AD64D33AC5EA330AE4B0217DA2
+
+rsa:
+  key:
+    pubKeyFile: MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAgJqp9TobaaoAYqYLytRVOJoivvVAIE937YCX/rxpD3wYtdfL40TqPXhha6zx/vSc1bU0ttnuZQaDyonRd3nT2Lj/csFjuhHorZgrCMIgpWgsulaIMZZjahRVzsEynuXIsOv351ljcOC1vZFg2GLhqSl+YjWybfDYx+kO1zie2GcY0Lj13bJJgi64Omc+gOxSf5ZW5Pq1Im6M91n9eB18D+DlxA4CrmIBW0N1XL0juHuIKIaqKx6MjJZF9UZtHouCm0DRVuy7qp1ugplX0LIsYTG2JszlMKwag1ql57Hl0ne+9EaK7ZYR+zypnSVDzTZKpWdr//wt59n0vostSdlvVwIDAQAB
+    priKeyFile: MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCAmqn1OhtpqgBipgvK1FU4miK+9UAgT3ftgJf+vGkPfBi118vjROo9eGFrrPH+9JzVtTS22e5lBoPKidF3edPYuP9ywWO6EeitmCsIwiClaCy6VogxlmNqFFXOwTKe5ciw6/fnWWNw4LW9kWDYYuGpKX5iNbJt8NjH6Q7XOJ7YZxjQuPXdskmCLrg6Zz6A7FJ/llbk+rUiboz3Wf14HXwP4OXEDgKuYgFbQ3VcvSO4e4gohqorHoyMlkX1Rm0ei4KbQNFW7LuqnW6CmVfQsixhMbYmzOUwrBqDWqXnseXSd770RortlhH7PKmdJUPNNkqlZ2v//C3n2fS+iy1J2W9XAgMBAAECggEAPm7XY7254Sou1bVWtDkwxjHN/HaDkywBRMPRBlHhjyrntB/3U3X5Ya43XVawhN2r5fP6i2pxWYo4IPOXRTFXrzbgjI1mJMbc9qmQ+seDoclZLX0k0S35RV5p6d3Q/WMAcyObTi0PIZV1pXoWUfZvJviF6pe277ilBSgXlFRgiR2Nxvrqr3c522xM4C1lZ1OZZSFSoaHhVweKuYs4lMsXgi79zwM2T9I1EG/F0SYDo+6z5dxrcywENH9wuMlnKlgbEfIp5FYbsHavOn7q/SswNk9nj0vIBLESopsZAQuG4344pH0yZFzLsCcu2wHk1qVJqRO1FNEOtWJcHLjvOBddQQKBgQDrHwrC87A7KVsDebsRXGGzcWnuPHrhbLw8o2qNdlbPL+4bV8hBMWMSjeyIzOA8EBlmxkQARmOHE8H4yGL97+e1btj4Rqj7qVUMrij7GXqw6JOAletxgUjacvI+5yAKy2dsjrlyY/0MdIKrgUJaFsTyE26LGaXpRYzBtVtRPWx0JQKBgQCMBjFfLnuDB1lmgcPBWWGcmnp94GaR6omNqfNIWtW0CrPFvW9cRiX3V5FSY1ox7Nqyb/f71wYldbXP+T8ZBlmaf2aoil/xpVfVXV58zbJSU5u3SD6JX8DJFBhcef/t1ODZCYTuCmit4PNKPb0xeyQI9R+UbH/SpaPk1WSMBzkeywKBgQDH7ximmLRGSq9zMCOL6sPF5G5QwKs5X85dvhSQgI3nFvnh1G6cSVPW5kq6NYWEbag8BeKzXSerKHjshfHvv/6IAN+NmACAKAkDhGGizJLRNqSfVlzkoyyBXfdy1/UeWML0xBUcGbyHx9eJ4Zu7odsNgsqgjEnSKGs+GWqylYnQ5QKBgAm3CEflTrZ5lQ9So4VPsUEPSr5fCl7HWgHVL8buXnNeZriqewZ463tsvO1tbT2XhFjrAdacRZXlw9aJIYKX+TGJ81JwP1XhteVc1AhusRebK2uc/JHFbffFiCcqY8JZibwlN+7YFAk0WUzmWbEMLSTd9PH0US4JRgTDdXVtrt3fAoGBAIjNLn1BzjjEWd88QYa7C359APH5+O/qZkXK7ngrStrRKI0S+iO+VbIPbI7Y35lCYn33l90evWdGYaAKNAfR+cRFyT2Ol2A6AqoecacM8+Zn/jjIwMX+04SAe2OMfzdLAQPagn2rr+mAs7vYyPzgD9Fafn+32gmHKuYJWKt3oewa
+    #    pubKeyFile: D:\key\sky_boot_rsa.pub
+    #    priKeyFile: D:\key\sky_boot_rsa

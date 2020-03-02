@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nssol.dao.master.TMetalcheckSensitivityDao">
+	<resultMap id="BaseResultMap" type="com.nssol.model.TMetalcheckSensitivity">
+		<id column="BaggingAddress" jdbcType="VARCHAR" property="baggingAddress" />
+		<result column="Sensitivity" jdbcType="DECIMAL" property="sensitivity" />
+		<result column="ScanTime" jdbcType="VARCHAR" property="scanTime" />
+		<result column="ScanNum" jdbcType="INTEGER" property="scanNum" />
+	</resultMap>
+
+	<sql id="getInspectionCondition">
+		<where>
+			1=1
+			<if test="createTimeStart != null and createTimeStart != ''">
+				AND DATE_FORMAT(ScanTime,"%Y-%m-%d %H:%i:%S") >= #{createTimeStart}
+			</if>
+
+			<if test="baggingAddress != null and baggingAddress != ''">
+				AND BaggingAddress = #{baggingAddress}
+			</if>
+
+			<if test="createTimeEnd != null and createTimeEnd != ''">
+				AND  #{createTimeEnd} >= DATE_FORMAT(ScanTime,"%Y-%m-%d %H:%i:%S")
+			</if>
+		</where>
+	</sql>
+
+	<insert id="insertMetalcheckSensitivity" parameterType="com.nssol.model.TMetalcheck">
+		
+		INSERT INTO T_Metalcheck_Sensitivity (
+			BaggingAddress,
+			Sensitivity,
+			ScanTime,
+			ScanNum,
+			Creater,
+			CreateTime
+)
+		VALUES(
+		#{baggingAddress},
+		#{sensitivity},
+		#{scanTime},
+		1,
+		#{creater},
+		#{createTime}
+		)
+	</insert>
+
+	<update id="updateMetalcheckSensitivity" parameterType="com.nssol.model.TMetalcheckSensitivity">
+		UPDATE T_Metalcheck_Sensitivity
+		SET ScanNum=ScanNum+1,
+		 Modifyer =#{creater},
+		 ModifyTime =#{createTime}
+		WHERE
+		     BaggingAddress = #{baggingAddress}
+		AND  Sensitivity = #{sensitivity}
+		AND  ScanTime = #{scanTime}
+	</update>
+
+	<select id="selectLatestSensitivity" parameterType="com.nssol.model.TMetalcheck"
+			resultMap="BaseResultMap">
+	SELECT BaggingAddress,Sensitivity,ScanTime,ScanNum
+	FROM T_Metalcheck_Sensitivity
+	WHERE BaggingAddress = #{baggingAddress}
+	ORDER BY ScanTime DESC
+	limit 1
+	</select>
+
+	<select id="selectSensitivityList" parameterType="com.nssol.model.TMetalcheck"
+			resultMap="BaseResultMap">
+	SELECT z.DicValue BaggingAddress,x.Sensitivity,DATE_FORMAT(x.ScanTime,"%Y-%m-%d %H:%i:%S") ScanTime,x.ScanNum
+	FROM T_Metalcheck_Sensitivity x
+	INNER JOIN t_mst_dictionary z
+	ON x.BaggingAddress = z.ID
+	<include refid="getInspectionCondition"/>
+	ORDER BY x.BaggingAddress DESC ,x.ScanTime
+	</select>
+</mapper>

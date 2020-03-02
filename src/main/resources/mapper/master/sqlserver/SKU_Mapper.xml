@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nssol.dao.master.SKUDao">
+	
+	<select id="getSKUBagging" resultType="com.nssol.web.dataanalytics.model.SKUInfo"
+			parameterType="com.nssol.web.dataanalytics.controller.sku.SKURequest">
+		select * from (SELECT
+		row_number() over(order by tb.scanTime DESC) RowID,
+			tod.SKUCode AS skuCode,
+			tod.SizeCode AS sizeCode,
+			tod.Size AS size,
+			tod.ColorCode AS colorCode,
+			tod.Color AS color,
+			isnull(tod.orderQty,0)AS orderQty ,
+			isnull(tb.scanNum,0)AS scanNum
+		FROM  (select SKUCode,SizeCode,Size,ColorCode,Color,sum(OrderQty_Pcs) AS orderQty FROM T_ORDER_DETAIL group by SKUCode,SizeCode,Size,ColorCode,Color)tod
+		LEFT JOIN (select SKUCode,sum(scanNum) AS scanNum ,max(ScanTime) AS scanTime from t_bagging group by SKUCode) tb
+		ON  tb.SKUCode = tod.SKUCode
+		WHERE 1=1
+		<if test="skuCode != null and skuCode != ''">
+			AND tod.SKUCode LIKE CONCAT('%',#{skuCode},'%')
+		</if>
+		<if test="sizeCode != null and sizeCode != ''">
+			AND (tod.SizeCode LIKE CONCAT('%',#{sizeCode},'%')
+			OR  tod.Size LIKE CONCAT('%',#{sizeCode},'%'))
+		</if>
+		<if test="colorCode != null and colorCode != ''">
+			AND (tod.ColorCode LIKE CONCAT('%',#{colorCode},'%')
+			OR tod.Color LIKE CONCAT('%',#{colorCode},'%'))
+		</if>)B
+		WHERE 1=1
+		<if test="pageStart >= 0 ">
+			and B.RowID >= #{pageStart} and  #{pageEnd} >B.RowID
+		</if>
+	</select>
+
+	<select id="getSKUTagging" resultType="com.nssol.web.dataanalytics.model.SKUInfo"
+			parameterType="com.nssol.web.dataanalytics.controller.sku.SKURequest">
+		select * from (SELECT
+		row_number() over(order by tt.scanTime DESC) RowID,
+		tod.SKUCode AS skuCode,
+		tod.SizeCode AS sizeCode,
+		tod.Size AS size,
+		tod.ColorCode AS colorCode,
+		tod.Color AS color,
+		isnull(tod.orderQty,0)AS orderQty ,
+		isnull(tt.scanNum,0)AS scanNum
+		FROM  (select SKUCode,SizeCode,Size,ColorCode,Color,sum(OrderQty_Pcs) AS orderQty FROM T_ORDER_DETAIL group by SKUCode,SizeCode,Size,ColorCode,Color)tod
+		LEFT JOIN (select SKUCode,sum(scanNum) AS scanNum, max(ScanTime) AS scanTime from t_tagging group by SKUCode) tt
+		ON  tt.SKUCode = tod.SKUCode
+		WHERE 1=1
+		<if test="skuCode != null and skuCode != ''">
+			AND tod.SKUCode LIKE CONCAT('%',#{skuCode},'%')
+		</if>
+		<if test="sizeCode != null and sizeCode != ''">
+			AND (tod.SizeCode LIKE CONCAT('%',#{sizeCode},'%')
+			OR  tod.Size LIKE CONCAT('%',#{sizeCode},'%'))
+		</if>
+		<if test="colorCode != null and colorCode != ''">
+			AND (tod.ColorCode LIKE CONCAT('%',#{colorCode},'%')
+			OR tod.Color LIKE CONCAT('%',#{colorCode},'%'))
+		</if>
+		)B
+		WHERE 1=1
+		<if test="pageStart >= 0 ">
+			and B.RowID >= #{pageStart} and  #{pageEnd} >B.RowID
+		</if>
+	</select>
+
+	<select id="getSKUMetalCheck" resultType="com.nssol.web.dataanalytics.model.SKUInfo"
+			parameterType="com.nssol.web.dataanalytics.controller.sku.SKURequest">
+		select * from (SELECT
+		row_number() over(order by tm.scanTime DESC) RowID,
+		tod.SKUCode AS skuCode,
+		tod.SizeCode AS sizeCode,
+		tod.Size AS size,
+		tod.ColorCode AS colorCode,
+		tod.Color AS color,
+		isnull(tod.orderQty,0)AS orderQty ,
+		isnull(tm.scanNum,0)AS scanNum
+		FROM   (select SKUCode,SizeCode,Size,ColorCode,Color,sum(OrderQty_Pcs) AS orderQty FROM T_ORDER_DETAIL group by SKUCode,SizeCode,Size,ColorCode,Color)tod
+		LEFT JOIN (select OrderNo,SKUCode,sum(scanNum) AS scanNum ,max(ScanTime) AS scanTime from T_Metalcheck group by OrderNo,SKUCode) tm
+		ON  tm.SKUCode = tod.SKUCode
+		WHERE 1=1
+		<if test="skuCode != null and skuCode != ''">
+			AND tod.SKUCode LIKE CONCAT('%',#{skuCode},'%')
+		</if>
+		<if test="sizeCode != null and sizeCode != ''">
+			AND (tod.SizeCode LIKE CONCAT('%',#{sizeCode},'%')
+			OR  tod.Size LIKE CONCAT('%',#{sizeCode},'%'))
+		</if>
+		<if test="colorCode != null and colorCode != ''">
+			AND (tod.ColorCode LIKE CONCAT('%',#{colorCode},'%')
+			OR tod.Color LIKE CONCAT('%',#{colorCode},'%'))
+		</if>
+		)B
+		WHERE 1=1
+		<if test="pageStart >= 0 ">
+			and B.RowID >= #{pageStart} and  #{pageEnd} >B.RowID
+		</if>
+	</select>
+</mapper>
+		

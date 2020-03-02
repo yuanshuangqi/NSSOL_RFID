@@ -1,0 +1,23 @@
+#top{
+	border-bottom: 1px solid #ddd;
+	background-color: #e3e4e5;
+}
+#top .w{
+	height: 30px;
+	line-height: 30px;
+	color:#999;
+}
+.fr{
+	float:right;
+}
+.fl{
+	float:left;
+}
+.userLi{
+	list-style:none;
+	padding-right: 20px;
+}
+.menuLi{
+	list-style:none;
+	
+}

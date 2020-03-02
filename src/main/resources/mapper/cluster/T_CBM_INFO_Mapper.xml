@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nssol.dao.cluster.ClusterCBMInfoDao">
+	<resultMap id="BaseResultMap" type="com.nssol.model.T_CBM_INFO">
+		<id column="transactionID" jdbcType="VARCHAR" property="transactionID" />
+		<result column="interfaceCode" jdbcType="VARCHAR" property="interfaceCode" />
+        <result column="orderNo" jdbcType="VARCHAR" property="orderNo" />
+        <result column="setCode" jdbcType="VARCHAR" property="setCode" />
+        <result column="typeCode" jdbcType="VARCHAR" property="typeCode" />
+        <result column="packType" jdbcType="VARCHAR" property="packType" />
+        <result column="cartonLength" jdbcType="FLOAT" property="cartonLength" />
+        <result column="cartonWidth" jdbcType="FLOAT" property="cartonWidth" />
+        <result column="cartonHeight" jdbcType="FLOAT" property="cartonHeight" />
+        <result column="volume" jdbcType="FLOAT" property="volume" />
+        <result column="netWeight" jdbcType="FLOAT" property="netWeight" />
+        <result column="grossWeight" jdbcType="FLOAT" property="grossWeight" />
+        <result column="actualWeight" jdbcType="FLOAT" property="actualWeight" />
+        <result column="createDate" jdbcType="TIMESTAMP" property="createDate" />
+        <result column="Creater" jdbcType="VARCHAR" property="creater" />
+        <result column="CreateTime" jdbcType="TIMESTAMP" property="createTime" />
+        <result column="Modifyer" jdbcType="VARCHAR" property="modifyer" />
+        <result column="ModifyTime" jdbcType="TIMESTAMP" property="modifyTime" />
+	</resultMap>
+	<select id="selectAllCBM" parameterType="com.nssol.model.T_CBM_INFO"
+		resultMap="BaseResultMap">
+		SELECT [TransactionID]
+		      ,[InterfaceCode]
+		      ,[OrderNo]
+		      ,[SetCode]
+		      ,[TypeCode]
+		      ,[PackType]
+		      ,[CartonLength]
+		      ,[CartonWidth]
+		      ,[CartonHeight]
+		      ,[Volume]
+		      ,[NetWeight]
+		      ,[GrossWeight]
+		      ,[ActualWeight]
+		      ,[CreateDate]
+		      ,[Creater]
+		      ,[CreateTime]
+		      ,[Modifyer]
+		      ,[ModifyTime]
+		  FROM [T_CBM_INFO]
+		WHERE
+            CreateTime > (#{0}) or ModifyTime > (#{0})
+	</select>
+</mapper>

@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nssol.dao.master.BaggingDao">
+	
+	<select id="getBaggingTotalCount" resultType="java.lang.Long"
+			parameterType="com.nssol.web.dataanalytics.controller.bagging.BaggingRequest">
+		SELECT COUNT (1) FROM (SELECT 1 AS COUNT
+		<include refid="getBaggingCondition"/>)PC
+	</select>
+
+
+	<select id="getBaggingList" resultType="com.nssol.web.dataanalytics.model.BaggingInfo"
+			parameterType="com.nssol.web.dataanalytics.controller.bagging.BaggingRequest">
+		SELECT * FROM (
+		SELECT
+		row_number() over(order by tb.OrderNo DESC) RowID,
+		tb.orderNo AS orderNo,
+		tpi.BusinessUnit AS buCode,
+		tb.SKUCode AS skuCode,
+		tb.SampleCode AS sampleCode,
+		tb.SizeCode+ ':' +tb.Size AS size,
+		tb.ColorCode +':'+tb.color AS color,
+		tb.PatternDimensionCode AS PatternDimensionCode,
+		tod.OrderQty_Pcs AS orderQty,
+		sum(tb.scanNum) AS scanNum
+		<include refid="getBaggingCondition"/>) B
+		WHERE
+		1=1
+		<if test="pageStart >= 0 ">
+			and B.RowID >= #{pageStart} and  #{pageEnd} >B.RowID
+		</if>
+	</select>
+
+	<sql id="getBaggingCondition">
+		FROM T_BAGGING tb
+		LEFT JOIN T_ORDER_DETAIL tod ON tod.OrderNo = tb.OrderNo and tod.skucode=tb.SKUCode
+		LEFT JOIN t_po_info tpi ON tod.OrderNo = tpi.OrderNo
+		WHERE
+		1=1
+		<if test="production != null and production != ''">
+			AND tb.baggingaddress = #{production}
+		</if>
+		<if test="dateFrom != null and dateFrom != ''">
+			AND tb.scantime <![CDATA[>=]]> #{dateFrom}
+		</if>
+		<if test="dateTo != null and dateTo != ''">
+			AND tb.scantime <![CDATA[<=]]> #{dateTo}
+		</if>
+		<if test="orderNo !=null and orderNo != ''">
+			AND tb.OrderNo LIKE CONCAT('%',#{orderNo},'%')
+		</if>
+		<if test="skuCode != null and skuCode != ''">
+			AND tb.SKUCode LIKE CONCAT('%',#{skuCode},'%')
+		</if>
+		<if test="sampleCode != null and sampleCode != ''">
+			AND tb.sampleCode LIKE CONCAT('%',#{sampleCode},'%')
+		</if>
+		<if test="sizeCode != null and sizeCode != ''">
+			AND (tb.sizeCode LIKE CONCAT('%',#{sizeCode},'%')
+			OR  tb.size LIKE CONCAT('%',#{sizeCode},'%'))
+		</if>
+		<if test="colorCode != null and colorCode != ''">
+			AND (tb.colorCode LIKE CONCAT('%',#{colorCode},'%')
+			OR tb.color LIKE CONCAT('%',#{colorCode},'%'))
+		</if>
+		GROUP BY
+		tb.orderNo ,
+		tpi.BusinessUnit,
+		tb.SKUCode,
+		tb.SampleCode,
+		tb.SizeCode,
+		tb.Size,
+		tb.ColorCode,
+		tb.color,
+		tb.PatternDimensionCode,
+		tod.OrderQty_Pcs
+	</sql>
+</mapper>
+		

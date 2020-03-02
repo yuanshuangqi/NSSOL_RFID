@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity3">
+
+<head>
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <title>角色管理</title>
+    <link href="css/bootstrap.min.css" rel="stylesheet"/>
+    <link href="css/bootstrap-table.min.css" rel="stylesheet"/>
+    <link href="css/bootstrap-treeview.css" rel="stylesheet"/>
+    <link href="css/toastr.min.css" rel="stylesheet"/>
+    
+    <script src="js/jquery.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/bootstrap-table.min.js"></script>
+    <script src="js/bootstrap-table-zh-CN.min.js"></script>
+    <script src="js/bootstrap-treeview.js"></script>
+    <script src="js/dialog.js"></script>
+    <script src="js/toastr.min.js"></script>
+    
+    <style type="text/css">
+    	.spancss {
+    		margin-left:20px;
+    	}
+    	
+    	.form-control {
+    		display:inline;
+    		width:200px;
+    		margin-bottom: 10px;
+    	}
+    	
+/* 	    .modal.fade.in { */
+/* 	        top:25%;   */
+/* 	    } */
+	    
+	    .modal-dialog {
+		    position: absolute;
+		    top: 50%;
+		    left: 50%;
+		    z-index: 3;
+		    margin: auto; 
+		    -webkit-transform: translate(-50%, -50%) !important;
+		    -moz-transform: translate(-50%, -50%) !important;
+		    -ms-transform: translate(-50%, -50%) !important;
+		    -o-transform: translate(-50%, -50%) !important;
+		    transform: translate(-50%, -50%) !important;
+		}
+	    
+	    .sa {
+	    	color:red;
+	    	margin-left:5px;
+	    }
+	</style>
+</head>
+<script th:inline="javascript">
+	//同步加载
+	$.ajaxSetup({ async : false });
+	//message显示位置
+	toastr.options.positionClass = 'toast-top-center';
+	//1:新增  2：编辑
+	var type = 0;
+	var roleData = [];
+	var token = $("meta[name='_csrf']").attr("content");
+	var header = $("meta[name='_csrf_header']").attr("content");
+	$(document).ajaxSend(function(e, xhr, options) {
+	   xhr.setRequestHeader(header, token);
+	});
+	
+	$(document).ready(function(){
+		$.ajax({
+	        url: "/loadPageResource",
+	        type: "GET",
+	        data:{ "pageNo":"roleList" },
+	        dataType: "json",
+	        success: function (result) {
+	        	/*<![CDATA[*/
+	        	if(result !=null) {
+	        		debugger
+	        		for(var i=0;i<result.length;i++) {
+	        			switch(result[i].fkFunctionNo) {
+	        				case "btnSearch":
+	        					$("#buttonArea").append('<button class="btn btn-primary" id="search_btn" name="btnSearch" style="margin-bottom: 10px; margin-top: -10px; margin-right: 5px">查询</button>');
+	        					break;
+	        				case "btnAdd":
+	        					$("#buttonArea").append('<button class="btn btn-primary" id="add_btn" name="btnAdd" style="margin-bottom: 10px; margin-top: -10px; margin-right: 5px" data-toggle="modal">新增</button>');
+	        					break;
+	        				case "btnEdit":
+	        					$("#buttonArea").append('<button class="btn btn-primary" id="edit_btn" name="btnEdit" style="margin-bottom: 10px; margin-top: -10px; margin-right: 5px" data-toggle="modal">编辑</button>');
+	        					break;
+	        				case "btnDel":
+	        					$("#buttonArea").append('<button class="btn btn-primary" id="del_btn" name="btnDel" style="margin-bottom: 10px; margin-top: -10px; margin-right: 5px">删除</button>');
+	        					break;
+	        				case "btnRole":
+	        					$("#buttonArea").append('<button class="btn btn-primary" id="role_btn" name="btnRole" style="margin-bottom: 10px; margin-top: -10px; margin-right: 5px">权限分配</button>');
+	        			}
+	        		}
+	        	}
+	        	/*]]>*/
+	        }
+		});
+		
+		$('#mytab').bootstrapTable({
+			method : 'get',
+			url : "/onloadRole",//请求路径
+			striped : true, //是否显示行间隔色
+			pageNumber : 1, //初始化加载第一页
+			pagination : true,//是否分页
+			sidePagination : 'server',//server:服务器端分页|client：前端分页
+			pageSize : 4,//单页记录数
+			pageList : [ 5, 10, 20, 30 ],//可选择单页记录数
+			//showRefresh : true,//刷新按钮
+			queryParams : function(params) {//上传服务器的参数
+				debugger
+				var temp = {//如果是在服务器端实现分页，limit、offset这两个参数是必须的
+					limit : params.limit, // 每页显示数量
+					offset : params.offset, // SQL语句起始索引
+					page : (params.offset / params.limit) + 1, //当前页码 
+					roleName : $('#search_name').val()
+				};
+				return temp;
+			},
+			columns : [ 
+			{
+			    checkbox: true,  
+			    visible: true,                  //是否显示复选框  
+			    value: 'roleCode',
+			}, {
+				title : '角色名',
+				field : 'roleName',
+			}, {
+				title : '创建时间',
+				field : 'createTime',
+			},],
+			onLoadSuccess: function () {
+				
+	        },
+	        onLoadError: function () {
+	            toastr.error('数据加载失败！');
+	        },
+// 	        onDblClickRow: function (row, $element) {
+// 	            var id = row.ID;
+// 	            EditViewById(id, 'view');
+// 	        },
+		})
+		
+		//查询按钮事件
+		$('#search_btn').click(function() {
+			$('#mytab').bootstrapTable('refresh', {
+				url : '/onloadRole'
+			})
+		});
+		
+		//新增按钮事件
+		$("#add_btn").click(function() {
+			type = 1;
+			restData();
+			$("#title").text("新增角色");
+			$('#myModal').modal("show");
+		})
+		
+		//编辑按钮事件
+		$('#edit_btn').click(function() {
+			debugger
+			type = 2;
+			restData();
+			//使用getSelections获得选中row的json格式的数据
+			var row = $.map($('#mytab').bootstrapTable('getSelections'),function (row) {
+				console.log(row);
+				return row;
+			});
+			/*<![CDATA[*/
+			if(row.length > 0 && row.length == 1) {
+				var sel = {};
+				sel["roleCode"] = row[0].roleCode;
+				//获取编辑数据
+				$.ajax({ 
+					url:"/getRoleEdit", 
+					type:"POST", 
+					dataType:"json", 
+					data:JSON.stringify(sel),
+					contentType: 'application/json; charset=UTF-8',
+					success:function(result){ 
+						if(result !=""){
+							$("#roleName").val(result.roleName);
+							$("#title").text("编辑角色");
+							$('#myModal').modal("show");
+						} else {
+							toastr.warning('当前操作的数据已被他人删除！');
+						}
+					} 
+				});
+			} else {
+				toastr.warning('请选择一个编辑的数据！');
+			}
+			/*]]>*/
+		});
+		
+		//提交事件
+		$('#submit').click(function() {
+			if($("#roleName").val() == null || $("#roleName").val() == "") {
+				toastr.warning('角色名不能为空！');
+			} else {
+				var url = type == 1 ? "/addRole":"/editRole";
+				var subData = {};
+				//使用getSelections获得选中row的json格式的数据
+				var row = $.map($('#mytab').bootstrapTable('getSelections'),function (row) {
+					console.log(row);
+					return row;
+				});
+				type == 1 ? "" : subData["roleCode"] = row[0].roleCode;
+				subData["roleName"] = $("#roleName").val();
+				//提交数据
+				$.ajax({ 
+					url:url, 
+					type:"POST", 
+					dataType:"json", 
+					data:JSON.stringify(subData),
+					contentType: 'application/json; charset=UTF-8',
+					success:function(result){
+						if(result.code == "success"){
+							toastr.success('提交成功');
+							$('#myModal').modal('hide');
+							$('#mytab').bootstrapTable('refresh', {
+								url : '/onloadRole'
+							})
+						} else if(result.code == "error"){
+							toastr.error('提交失败');
+						} else if(result.code == "warning") {
+							toastr.warning('该角色名已存在！');
+						}
+					} 
+				});
+			}
+		});
+		
+		//删除事件
+		$('#del_btn').click(function() {
+			//使用getSelections获得选中row的json格式的数据
+			var row = $.map($('#mytab').bootstrapTable('getSelections'),function (row) {
+				console.log(row);
+				return row;
+			});
+			/*<![CDATA[*/
+			if(row.length > 0) {
+				Ewin.confirm({ title: "删除确认",message: "确定要选中的角色删除吗？" }).on(function (e) {
+	                if (!e) {
+	                    return;
+	                }
+	                var subDatas = [];
+					for(var i=0;i<row.length;i++){
+						var subData = {};
+						subData["roleCode"] = row[i].roleCode;
+						subDatas.push(subData);
+					}
+					//提交数据
+					$.ajax({ 
+						url:"/delRole", 
+						type:"POST", 
+						dataType:"json", 
+						data:JSON.stringify(subDatas),
+						contentType: 'application/json; charset=UTF-8',
+						success:function(result){
+							if(result.code == "success"){
+								toastr.success("删除成功");
+								$('#mytab').bootstrapTable('refresh', {
+									url : '/onloadRole'
+								})
+							} else if(result.code == "error"){
+								toastr.error("删除失败");
+							} else if(result.code == "warning"){
+								toastr.error("无法删除，该角色上已有用户");
+							}
+						} 
+					});
+	            });
+			} else {
+				toastr.warning('请选择删除的数据');
+			}
+			/*]]>*/
+		});
+		
+		//查询区域收放
+		$("#condition").click(function() {
+			if($("#condition").text() == "▲") {
+				$("#condition").text("▼");
+				$("#conArea").hide();
+			} else if($("#condition").text() == "▼"){
+				$("#condition").text("▲");
+				$("#conArea").show();
+			}
+		});
+		
+		//权限编辑数据
+		$('#role_btn').click(function() {
+			//使用getSelections获得选中row的json格式的数据
+			var row = $.map($('#mytab').bootstrapTable('getSelections'),function (row) {
+				console.log(row);
+				return row;
+			});
+			/*<![CDATA[*/
+			if(row.length > 0 && row.length == 1) {
+				var sel = {};
+				sel["roleCode"] = row[0].roleCode;
+				//获取编辑数据
+				$.ajax({ 
+					url:"/getRoleResource", 
+					type:"POST", 
+					dataType:"json", 
+					data:JSON.stringify(sel),
+					contentType: 'application/json; charset=UTF-8',
+					success:function(result){ 
+						debugger
+						if(result !=""){
+							//一层
+							var params1 = [];
+							for(var i=0;i<result.length;i++) {
+								var param1 = {};
+								param1["text"] = result[i].moduleName;
+								param1["nodeCode"] = result[i].moduleNo;
+								param1["tag"] = 1;
+								//下级页面是否有选中的，有就把父级勾选
+								for(var j=0;j<result[i].lsPageInfo.length;j++) {
+									if(result[i].lsPageInfo[j].isPagecheck == true) {
+										var chkPage = {};
+										chkPage["checked"] = true;
+										param1["state"] = chkPage;
+									}
+								}
+								//二层
+								var params2 = [];
+								for(var j=0;j<result[i].lsPageInfo.length;j++) {
+									var param2 = {};
+									param2["text"] = result[i].lsPageInfo[j].pageName;
+									param2["nodeCode"] = result[i].lsPageInfo[j].pageNo;
+									var chkPage = {};
+									chkPage["checked"] = result[i].lsPageInfo[j].isPagecheck;
+									param2["state"] = chkPage;
+									param2["tag"] = 2;
+									//三层
+									var params3 = [];
+									for(var k=0;k<result[i].lsPageInfo[j].lsFunctionInfo.length;k++) {
+										var param3 = {};
+										param3["text"] = result[i].lsPageInfo[j].lsFunctionInfo[k].functionName;
+										param3["nodeCode"] = result[i].lsPageInfo[j].lsFunctionInfo[k].functionNo;
+										//param3["state.checked"] = result[i].lsPageInfo[j].lsFunctionInfo[k].isFunctioncheck;
+										var chkFunction = {};
+										chkFunction["checked"] = result[i].lsPageInfo[j].lsFunctionInfo[k].isFunctioncheck;
+										param3["state"] = chkFunction;
+										param3["tag"] = 3;
+										params3.push(param3);
+									}
+									param2["nodes"] = params3;
+									params2.push(param2);
+								}
+								param1["nodes"] = params2;
+								params1.push(param1);
+ 							}
+							roleData = params1;
+						}
+					} 
+				});
+				roleTreeLoad();
+			} else {
+				toastr.warning("请选择用户分配权限！");
+			}
+			/*]]>*/
+		});
+		
+		//权限提交
+		$("#submitRole").click(function() {
+			var row = $.map($('#mytab').bootstrapTable('getSelections'),function (row) {
+				console.log(row);
+				return row;
+			});
+			/*<![CDATA[*/
+			if(row.length > 0 && row.length == 1) {
+				var checkTree = $('#role_tree').treeview('getChecked');
+				var params = [];
+				if(checkTree.length > 0) {
+					for(var i=0;i<checkTree.length;i++){
+						//二层（页面）
+						if(checkTree[i].tag == 2) {
+							var type = 0;
+							//判断页面是否有按钮
+							for(var n=0;n<checkTree.length;n++){
+								if(checkTree[i].nodeId == checkTree[n].parentId) {
+                					type = 1
+        	                		break;
+                				}
+							}
+							//有就附加按钮，没有就只附加页面
+							if(type == 1) {
+								for(var j=0;j<checkTree.length;j++){
+									//二级页面
+									var param = {};
+									param["fkPageNo"] = checkTree[i].nodeCode;
+									//三层（按钮）
+									if(checkTree[j].tag == 3) {
+										//判断二层的nodeId 是否等于 三层的parentId
+										if(checkTree[i].nodeId == checkTree[j].parentId) {
+											//取对应的三层
+											param["fkFunctionNo"] = checkTree[j].nodeCode;
+											param["fkRoleCode"] = row[0].roleCode;
+											params.push(param);
+										}
+									}
+								}
+							} else {
+								var param = {};
+								param["fkPageNo"] = checkTree[i].nodeCode;
+								param["fkRoleCode"] = row[0].roleCode;
+								params.push(param);
+							}
+							
+						}
+					}
+				}
+				else {
+					var param = {};
+					param["fkRoleCode"] = row[0].roleCode;
+					params.push(param);
+				}
+			}
+			/*]]>*/
+			//提交权限数据
+			$.ajax({ 
+				url:"/subRole", 
+				type:"POST", 
+				dataType:"json", 
+				data:JSON.stringify(params),
+				contentType: 'application/json; charset=UTF-8',
+				success:function(result){
+					if(result.code == "success"){
+						toastr.success("提交成功");
+						$('#roleModal').modal('hide');
+					} else if(result.code == "error"){
+						toastr.error("提交失败");
+					}
+				} 
+			});
+		})
+	})
+	
+	function roleTreeLoad(){
+		//加载树
+		$('#role_tree').treeview({
+			showCheckbox: true,
+            data:roleData,
+            onNodeChecked: function(event, node) { //选中节点
+                var selectNodes = getChildNodeIdArr(node); //获取所有子节点
+                if (selectNodes) { //子节点不为空，则选中所有子节点
+                    $('#role_tree').treeview('checkNode', [selectNodes, { silent: true }]);
+                }
+                var parentNode = $("#role_tree").treeview("getNode", node.parentId);
+                setParentNodeCheck(node);
+		    },
+            onNodeUnchecked: function(event, node) { //取消选中节点
+                var selectNodes = getChildNodeIdArr(node); //获取所有子节点
+                if (selectNodes) { //子节点不为空，则取消选中所有子节点
+                    $('#role_tree').treeview('uncheckNode', [selectNodes, { silent: true }]);
+                }
+            }
+		})
+		$('#roleModal').modal("show");
+	}
+	
+	//数据重置
+	function restData(){
+		$("#roleName").val("");
+	}
+	
+	//获取选中的子级
+	function getChildNodeIdArr(node) {
+	    var ts = [];
+	    if (node.nodes) {
+	        for (x in node.nodes) {
+	            ts.push(node.nodes[x].nodeId);
+	            if (node.nodes[x].nodes) {
+	                var getNodeDieDai = getChildNodeIdArr(node.nodes[x]);
+	                for (j in getNodeDieDai) {
+	                    ts.push(getNodeDieDai[j]);
+	                }
+	            }
+	        }
+	    } else {
+	        ts.push(node.nodeId);
+	    }
+	    return ts;
+	}
+	
+	//设置选中父级
+	function setParentNodeCheck(node) {
+	    var parentNode = $("#role_tree").treeview("getNode", node.parentId);
+	    if (parentNode.nodes) {
+	        var checkedCount = 0;
+	        //正常操作
+// 	        for (x in parentNode.nodes) {
+// 	            if (parentNode.nodes[x].state.checked) {
+// 	                checkedCount ++;
+// 	            } else {
+// 	                break;
+// 	            }
+// 	        }
+// 	        if (checkedCount === parentNode.nodes.length) {
+// 	            $("#role_tree").treeview("checkNode", parentNode.nodeId);
+// 	            setParentNodeCheck(parentNode);
+// 	        } 
+			//反向操作
+	        for (x in parentNode.nodes) {
+	            if (parentNode.nodes[x].state.checked) {
+	                checkedCount ++;
+	            }
+	        }
+			if (checkedCount > 0) {
+				$('#role_tree').treeview('checkNode', [parentNode.nodeId, { silent: true }]);
+			}
+	    }
+	}
+</script>
+
+<body>
+	<div class="panel panel-default">
+	    <div class="panel-heading">
+		    <span>查询条件</span>
+		    <label style="cursor:pointer;width:94%;text-align:right" id="condition">▲</label>
+	    </div>
+	    <div class="panel-body form-group" style="margin-bottom:-10px" id="conArea">
+	        <label class="col-sm-1 control-label" style="text-align: right; margin-top:5px">角色名</label>
+	        <div class="col-sm-2">
+	            <input type="text" class="form-control" name="roleName" id="search_name"/>
+	        </div>
+	     </div>
+	</div>
+	<div style="margin-button:20px">
+		<div style="margin-left: 10px" id="buttonArea">
+<!--             <button class="btn btn-primary" id="search_btn" style="margin-bottom: 10px;margin-top: -10px;">查询</button> -->
+<!--             <button class="btn btn-primary" id="add_btn" style="margin-bottom: 10px;margin-top: -10px;" data-toggle="modal">新增</button> -->
+<!--             <button class="btn btn-primary" id="edit_btn" style="margin-bottom: 10px;margin-top: -10px;" data-toggle="modal">编辑</button> -->
+<!--             <button class="btn btn-primary" id="del_btn" style="margin-bottom: 10px;margin-top: -10px;">删除</button> -->
+<!--             <button class="btn btn-primary" id="role_btn" style="margin-bottom: 10px;margin-top: -10px;">权限分配</button> -->
+        </div>
+	</div>
+	<table id="mytab" class="table table-hover"></table>
+	
+	<!-- 新增/编辑（Modal） -->
+	<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+						&times;
+					</button>
+					<h4 class="modal-title" id="myModalLabel">
+						<span id="title"></span>
+					</h4>
+				</div>
+				<div class="modal-body">
+					<div>
+						<span class="spancss">角色名<span class="sa">*</span></span>
+				        <input type="text" class="form-control" name="roleName" id="roleName" maxlength="10"/> 
+			        </div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">关闭
+					</button>
+					<button type="button" class="btn btn-primary" id="submit">
+						提交
+					</button>
+				</div>
+			</div><!-- /.modal-content -->
+		</div><!-- /.modal -->
+	</div>
+	
+	<!-- role -->
+	<div class="modal fade" id="roleModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+						&times;
+					</button>
+					<h4 class="modal-title" id="myModalLabel">
+						<span>权限编辑</span>
+					</h4>
+				</div>
+				<div class="modal-body">
+					<div id="role_tree"></div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">关闭
+					</button>
+					<button type="button" class="btn btn-primary" id="submitRole">
+						提交
+					</button>
+				</div>
+			</div><!-- /.modal-content -->
+		</div><!-- /.modal -->
+	</div>
+</body>
+</html>

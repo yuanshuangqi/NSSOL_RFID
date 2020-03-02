@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nssol.dao.master.MenuDao">
+	<insert id="save" parameterType="com.nssol.web.system.model.MenuInfo">
+		INSERT INTO M_MENU
+		(icon,
+		menucode,
+		menuname,
+		ismenuorbtn,
+		parentid,
+		url,
+		creater,
+		isdel,
+		createtime,
+		modifytime,
+		modifyer)
+		values
+		(
+		#{icon},
+		#{menuCode},
+		#{menuName},
+		#{menuOrBtn},
+		#{parentId},
+		#{url},
+		#{creater},
+		#{isDel},
+		#{createTime},
+		#{modifyTime},
+		#{modifyer}
+		)
+	</insert>
+
+	<select id="findMenu" parameterType="com.nssol.web.system.controller.menu.MenuRequest"
+			resultType="com.nssol.web.system.model.MenuInfo">
+		SELECT
+		id AS id,
+		icon AS icon,
+		menucode AS menuCode,
+		menuname AS menuName,
+		ismenuorbtn AS menuOrBtn,
+		parentid AS parentId,
+		url AS url,
+		creater AS creater,
+		isdel AS isDel,
+		createtime AS createTime,
+		modifytime AS modifyTime,
+		modifyer AS modifyer
+		FROM M_MENU
+		WHERE
+		1=1
+		<if test="menuName != null and menuName != ''">
+			AND( MenuCode LIKE CONCAT('%',#{menuName},'%')
+			OR MenuName LIKE CONCAT('%',#{menuName},'%'))
+		</if>
+
+	</select>
+
+	<delete id="deleteMenu" parameterType="java.lang.Long">
+		DELETE
+		FROM M_MENU
+		WHERE id = #{id} OR ParentId = #{id}
+	</delete>
+
+	<delete id="deleteRoleMenu">
+		DELETE a
+		FROM M_ROLE_MENU  a
+		LEFT JOIN M_MENU b
+		ON a.MenuId = b.ID
+		WHERE b.ID is null
+	</delete>
+
+	<select id="findByParentId" parameterType="java.lang.Long"
+			resultType="com.nssol.web.system.model.MenuInfo">
+		SELECT
+		id AS id,
+		icon AS icon,
+		menucode AS menuCode,
+		menuname AS menuName,
+		ismenuorbtn AS menuOrBtn,
+		parentid AS parentId,
+		url AS url,
+		creater AS creater,
+		isdel AS isDel,
+		createtime AS createTime,
+		modifytime AS modifyTime,
+		modifyer AS modifyer
+		FROM M_MENU
+		WHERE
+		parentid=#{id}
+	</select>
+
+
+	<update id="update" parameterType="com.nssol.web.system.model.MenuInfo">
+		UPDATE M_MENU
+		SET icon = #{icon},
+		menucode = #{menuCode},
+		menuname = #{menuName},
+		ismenuorbtn = #{menuOrBtn},
+		parentid = #{parentId},
+		url = #{url},
+		modifytime = #{modifyTime},
+		modifyer = #{modifyer}
+		WHERE id = #{id}
+	</update>
+
+</mapper>
+		

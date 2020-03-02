@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.nssol.dao.master.DataManagementDao">
+
+    <select id="getTaggingTotal"  resultType="java.lang.Integer">
+        select sum(ScanNum) from t_tagging
+        WHERE 1=1
+        <if test="dateFrom != null and dateFrom != ''">
+        AND scantime <![CDATA[>=]]> #{dateFrom}
+        </if>
+        <if test="dateTo != null and dateTo != ''">
+            AND scantime <![CDATA[<=]]> #{dateTo}
+        </if>
+    </select>
+
+    <select id="getBaggingTotal"  resultType="java.lang.Integer">
+        select sum(ScanNum) from t_bagging
+        WHERE 1=1
+        <if test="dateFrom != null and dateFrom != ''">
+            AND scantime <![CDATA[>=]]> #{dateFrom}
+        </if>
+        <if test="dateTo != null and dateTo != ''">
+            AND scantime <![CDATA[<=]]> #{dateTo}
+        </if>
+    </select>
+
+    <select id="getMetalCheckTotal"  resultType="java.lang.Integer">
+        select sum(ScanNum) from T_Metalcheck
+        WHERE 1=1
+        <if test="dateFrom != null and dateFrom != ''">
+            AND scantime <![CDATA[>=]]> #{dateFrom}
+        </if>
+        <if test="dateTo != null and dateTo != ''">
+            AND scantime <![CDATA[<=]]> #{dateTo}
+        </if>
+    </select>
+
+    <select id="getProduction" resultType="com.nssol.web.dataanalytics.model.ProductionInfo">
+        select
+          md.id AS id
+          ,md.DicType AS DicType
+          ,md.DicValue AS dicValue
+          ,sum(tb.scannum) AS productionQty
+        from T_MST_DICTIONARY md
+          left join (SELECT * FROM T_BAGGING
+        where 1=1
+        <if test="dateFrom != null and dateFrom != ''">
+            AND scantime <![CDATA[>=]]> #{dateFrom}
+        </if>
+        <if test="dateTo != null and dateTo != ''">
+            AND scantime <![CDATA[<=]]> #{dateTo}
+        </if>
+        ) tb
+        on md.id = tb.BaggingAddress
+        where md.dicType = 'Bagging'
+        group by md.id,md.DicType,md.DicValue
+        union all
+        select
+        md.id AS id
+        ,md.DicType AS DicType
+        ,md.DicValue AS dicValue
+        ,sum(tt.scannum) AS productionQty
+        from T_MST_DICTIONARY md
+        left join (SELECT * FROM T_Tagging
+        WHERE 1=1
+        <if test="dateFrom != null and dateFrom != ''">
+            AND scantime <![CDATA[>=]]> #{dateFrom}
+        </if>
+        <if test="dateTo != null and dateTo != ''">
+            AND scantime <![CDATA[<=]]> #{dateTo}
+        </if>) tt on md.id = tt.TaggingAddress
+        where dictype = 'Tagging'
+        group by md.id,md.DicType,md.DicValue
+        union all
+        select
+            md.id AS id
+            ,md.dicType AS dicType
+            ,md.DicValue AS dicValue
+            ,sum(tm.scannum)  AS productionQty
+        from T_MST_DICTIONARY md
+        left join (SELECT * FROM T_Metalcheck
+        WHERE 1=1
+        <if test="dateFrom != null and dateFrom != ''">
+            AND scantime <![CDATA[>=]]> #{dateFrom}
+        </if>
+        <if test="dateTo != null and dateTo != ''">
+            AND scantime <![CDATA[<=]]> #{dateTo}
+        </if>) tm on md.id = tm.BaggingAddress
+        where dicType = 'MetalCheck'
+        group by md.id,md.dicType,md.DicValue
+    </select>
+
+</mapper>

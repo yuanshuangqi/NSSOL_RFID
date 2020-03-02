@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nssol.dao.cluster.ClusterOrderDetailDao">
+	<resultMap id="BaseResultMap" type="com.nssol.model.T_ORDER_DETAIL">
+		<id column="OrderNo" jdbcType="VARCHAR" property="orderNo" />
+		<result column="DetailNo" jdbcType="VARCHAR" property="detailNo" />
+        <result column="ColorCode" jdbcType="VARCHAR" property="colorCode" />
+        <result column="Color" jdbcType="VARCHAR" property="color" />
+        <result column="SizeCode" jdbcType="VARCHAR" property="sizeCode" />
+        <result column="Size" jdbcType="VARCHAR" property="size" />
+        <result column="PatternDimensionCode" jdbcType="VARCHAR" property="patternDimensionCode" />
+        <result column="SampleCode" jdbcType="VARCHAR" property="sampleCode" />
+        <result column="ItemCode" jdbcType="VARCHAR" property="itemCode" />
+        <result column="Item" jdbcType="VARCHAR" property="item" />
+        <result column="SKUCode" jdbcType="VARCHAR" property="sKUCode" />
+        <result column="SKUCodeForShipping" jdbcType="VARCHAR" property="sKUCodeForShipping" />
+        <result column="OrderQty_Pcs" jdbcType="DECIMAL" property="orderQty_Pcs" />
+        <result column="IsDel" jdbcType="INTEGER" property="isDel" />
+        <result column="Creater" jdbcType="VARCHAR" property="creater" />
+        <result column="CreateTime" jdbcType="TIMESTAMP" property="createTime" />
+        <result column="Modifyer" jdbcType="VARCHAR" property="modifyer" />
+        <result column="ModifyTime" jdbcType="TIMESTAMP" property="modifyTime" />
+	</resultMap>
+	<select id="selectAll" parameterType="com.nssol.model.T_PO_INFO"
+		resultMap="BaseResultMap">
+		SELECT
+			B.OrderNo,
+			B.DetailNo,
+			B.ColorCode,
+			B.Color,
+			B.SizeCode,
+			B.Size,
+			B.PatternDimensionCode,
+			B.SampleCode,
+			B.ItemCode,
+			B.Item,
+			B.SKUCode,
+			B.SKUCodeForShipping,
+			B.OrderQty_Pcs,
+            B.IsDel,
+            B.Creater,
+            B.CreateTime,
+            B.Modifyer,
+            B.ModifyTime
+		FROM 
+			T_PO_INFO A,T_ORDER_DETAIL B
+		WHERE
+		    A.OrderNo = B.OrderNo
+		    AND (A.CreateTime > (#{0}) or A.ModifyTime > (#{0}))
+	</select>
+</mapper>

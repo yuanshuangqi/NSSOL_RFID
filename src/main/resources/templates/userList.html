@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity3">
+
+<head>
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <title>用户管理</title>
+    <link href="css/bootstrap.min.css" rel="stylesheet"/>
+    <link href="css/bootstrap-table.min.css" rel="stylesheet"/>
+    <link href="css/toastr.min.css" rel="stylesheet"/>
+    
+    <script src="js/jquery.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/bootstrap-table.min.js"></script>
+    <script src="js/bootstrap-table-zh-CN.min.js"></script>
+    <script src="js/dialog.js"></script>
+    <script src="js/toastr.min.js"></script>
+    
+    <style type="text/css">
+    	.spancss {
+    		margin-left:20px;
+    	}
+    	
+    	.form-control {
+    		display:inline;
+    		width:200px;
+    		margin-bottom: 10px;
+    	}
+
+		.modal-dialog {
+		    position: absolute;
+		    top: 50%;
+		    left: 50%;
+		    z-index: 3;
+		    margin: auto; 
+		    -webkit-transform: translate(-50%, -50%) !important;
+		    -moz-transform: translate(-50%, -50%) !important;
+		    -ms-transform: translate(-50%, -50%) !important;
+		    -o-transform: translate(-50%, -50%) !important;
+		    transform: translate(-50%, -50%) !important;
+		}
+	    
+	    .sa {
+	    	color:red;
+	    	margin-left:5px;
+	    }
+	</style>
+</head>
+<script th:inline="javascript">
+	//同步加载
+	$.ajaxSetup({ async : false });
+	
+	//message显示位置
+	toastr.options.positionClass = 'toast-top-center';
+	
+	<!-- 1:新增  2：编辑 -->
+	var type = 0;
+	
+	var token = $("meta[name='_csrf']").attr("content");
+	var header = $("meta[name='_csrf_header']").attr("content");
+	$(document).ajaxSend(function(e, xhr, options) {
+	   xhr.setRequestHeader(header, token);
+	});
+	
+	$(document).ready(function(){
+		$.ajax({
+	        url: "/loadPageResource",
+	        type: "GET",
+	        data:{ "pageNo":"userList" },
+	        dataType: "json",
+	        success: function (result) {
+	        	/*<![CDATA[*/
+	        	if(result !=null) {
+	        		debugger
+	        		for(var i=0;i<result.length;i++) {
+	        			switch(result[i].fkFunctionNo) {
+	        				case "btnSearch":
+	        					$("#buttonArea").append('<button class="btn btn-primary" id="search_btn" name="btnSearch" style="margin-bottom: 10px;margin-top: -10px;margin-right: 5px">查询</button>');
+	        					break;
+	        				case "btnAdd":
+	        					$("#buttonArea").append('<button class="btn btn-primary" id="add_btn" name="btnAdd" style="margin-bottom: 10px;margin-top: -10px;margin-right: 5px" data-toggle="modal">新增</button>');
+	        					break;
+	        				case "btnEdit":
+	        					$("#buttonArea").append('<button class="btn btn-primary" id="edit_btn" name="btnEdit" style="margin-bottom: 10px;margin-top: -10px;margin-right: 5px" data-toggle="modal">编辑</button>');
+	        					break;
+	        				case "btnDel":
+	        					$("#buttonArea").append('<button class="btn btn-primary" id="del_btn" name="btnDel" style="margin-bottom: 10px;margin-top: -10px;margin-right: 5px">删除</button>');
+	        					break;
+	        				case "btnRestPas":
+	        					$("#buttonArea").append('<button class="btn btn-primary" id="rest_pas_btn" name="btnRestPas" style="margin-bottom: 10px;margin-top: -10px;margin-right: 5px">重置密码</button>');
+	        					break;
+	        			}
+	        		}
+	        	}
+	        	/*]]>*/
+	        }
+		});
+		
+		$('#mytab').bootstrapTable({
+			method : 'get',
+			url : "/getUserListPage",//请求路径
+			striped : true, //是否显示行间隔色
+			pageNumber : 1, //初始化加载第一页
+			pagination : true,//是否分页
+			sidePagination : 'server',//server:服务器端分页|client：前端分页
+			pageSize : 4,//单页记录数
+			pageList : [ 5, 10, 20, 30 ],//可选择单页记录数
+			//showRefresh : true,//刷新按钮
+			queryParams : function(params) {//上传服务器的参数
+				debugger
+				var temp = {//如果是在服务器端实现分页，limit、offset这两个参数是必须的
+					limit : params.limit, // 每页显示数量
+					offset : params.offset, // SQL语句起始索引
+					page : (params.offset / params.limit) + 1, //当前页码 
+					userName : $('#search_name').val()
+				};
+				return temp;
+			},
+			columns : [ 
+			{
+			    checkbox: true,  
+			    visible: true,                  //是否显示复选框
+			    value: 'userId',
+			}, {
+				title : '账户',
+				field : 'userName',
+			}, {
+				title : '用户名',
+				field : 'realName',
+			}, {
+				title : '角色',
+				field : 'roleName',
+			}, {
+				title : '手机号',
+				field : 'tel',
+			},],
+			onLoadSuccess: function () {
+				
+	        },
+	        onLoadError: function () {
+	            //showTips("数据加载失败！");
+	            toastr.error('数据加载失败！');
+	        },
+// 	        onDblClickRow: function (row, $element) {
+// 	            var id = row.ID;
+// 	            EditViewById(id, 'view');
+// 	        },
+		})
+		
+		//获取角色数据
+		$.ajax({ 
+			url:"/selectRole", 
+			type:"GET", 
+			dataType:"json", 
+			success:function(result){ 
+				var list = result; 
+				//返回的数据 
+				var roleNo = document.getElementById("roleNo"); 
+				//roleNo为select定义的id 
+				for(var p in list){ 
+					var option = document.createElement("option"); 
+					// 创建添加option属性 
+					option.setAttribute("value",list[p].roleCode); 
+					// 给option的value添加值 
+					option.innerText=list[p].roleName; 
+					// 打印option对应的纯文本 
+					roleNo.appendChild(option);
+				} 
+			} 
+		});
+		
+		//查询按钮事件
+		$('#search_btn').click(function() {
+			$('#mytab').bootstrapTable('refresh', {
+				url : '/getUserListPage'
+			})
+		});
+		
+		//新增按钮事件
+		$("#add_btn").click(function() {
+			type = 1;
+			restData();
+			$("#title").text("新增用户");
+			$('#myModal').modal("show");
+		})
+		
+		//编辑按钮事件
+		$('#edit_btn').click(function() {
+			debugger
+			type = 2;
+			restData();
+			//使用getSelections获得选中row的json格式的数据
+			var row = $.map($('#mytab').bootstrapTable('getSelections'),function (row) {
+				console.log(row);
+				return row;
+			});
+			/*<![CDATA[*/
+			if(row.length > 0 && row.length == 1) {
+				var sel = {};
+				sel["userId"] = row[0].userId;
+				//获取编辑数据
+				$.ajax({ 
+					url:"/getUserEdit", 
+					type:"POST", 
+					dataType:"json", 
+					data:JSON.stringify(sel),
+					contentType: 'application/json; charset=UTF-8',
+					success:function(result){ 
+						if(result !=""){
+							$("#userName").val(result.userName);
+							$("#realName").val(result.realName);
+							$("#tel").val(result.tel);
+							$("#roleNo").val(result.fkRoleCode);
+							$("#title").text("编辑用户");
+							$('#myModal').modal("show");
+						} else {
+							toastr.warning('当前操作的数据已被他人删除');
+						}
+					} 
+				});
+			} else {
+				toastr.warning('请选择一个编辑的数据');
+			}
+			/*]]>*/
+		});
+		
+		//提交事件
+		$('#submit').click(function() {
+			if($("#userName").val() == null || $("#userName").val() == "") {
+				toastr.warning('账户不能为空！');
+			} else if($("#realName").val() == null || $("#realName").val() == ""){
+				toastr.warning('用户名不能为空！');
+			} else if($("#roleNo").val() == ""){
+				toastr.warning('请选择角色！');
+			} else {
+				var url = type == 1 ? "/addUser":"/editUser";
+				var subData = {};
+				//使用getSelections获得选中row的json格式的数据
+				var row = $.map($('#mytab').bootstrapTable('getSelections'),function (row) {
+					console.log(row);
+					return row;
+				});
+				type == 1 ? "" : subData["userId"] = row[0].userId;
+				subData["userName"] = $("#userName").val();
+				subData["realName"] = $("#realName").val();
+				subData["tel"] = $("#tel").val();
+				subData["fkRoleCode"] = $("#roleNo").val();
+				//提交数据
+				$.ajax({ 
+					url:url, 
+					type:"POST", 
+					dataType:"json", 
+					data:JSON.stringify(subData),
+					contentType: 'application/json; charset=UTF-8',
+					success:function(result){
+						if(result.code == "success"){
+							toastr.success('提交成功');
+							$('#myModal').modal('hide');
+							$('#mytab').bootstrapTable('refresh', {
+								url : '/getUserListPage'
+							})
+						} else if(result.code == "error"){
+							toastr.error('提交失败');
+						} else if(result.code == "warning") {
+							toastr.warning('该用户名已存在');
+						}
+					} 
+				});
+			}
+		});
+		
+		//删除事件
+		$('#del_btn').click(function() {
+			//使用getSelections获得选中row的json格式的数据
+			var row = $.map($('#mytab').bootstrapTable('getSelections'),function (row) {
+				console.log(row);
+				return row;
+			});
+			/*<![CDATA[*/
+			if(row.length > 0) {
+				Ewin.confirm({ title: "删除确认",message: "确认要删除选择的数据吗？" }).on(function (e) {
+	                if (!e) {
+	                    return;
+	                }
+	                var subDatas = [];
+					for(var i=0;i<row.length;i++){
+						var subData = {};
+						subData["userId"] = row[i].userId;
+						subDatas.push(subData);
+					}
+	              	//提交数据
+					$.ajax({ 
+						url:"/delUser", 
+						type:"POST", 
+						dataType:"json", 
+						data:JSON.stringify(subDatas),
+						contentType: 'application/json; charset=UTF-8',
+						success:function(result){
+							if(result.code == "success"){
+								toastr.success('删除成功');
+								$('#mytab').bootstrapTable('refresh', {
+									url : '/getUserListPage'
+								})
+							} else if(result.code == "error"){
+								toastr.error('删除失败');
+							}
+						} 
+					});
+	            });
+			} else {
+				toastr.warning('请选择删除的数据');
+			}
+			/*]]>*/
+		});
+		
+		//查询区域收放
+		$("#condition").click(function() {
+			if($("#condition").text() == "▲") {
+				$("#condition").text("▼");
+				$("#conArea").hide();
+			} else if($("#condition").text() == "▼"){
+				$("#condition").text("▲");
+				$("#conArea").show();
+			}
+		});
+		
+		//重置密码
+		$("#rest_pas_btn").click(function() {
+			//使用getSelections获得选中row的json格式的数据
+			var row = $.map($('#mytab').bootstrapTable('getSelections'),function (row) {
+				console.log(row);
+				return row;
+			});
+			/*<![CDATA[*/
+			if(row.length > 0) {
+				Ewin.confirm({ title: "重置确认",message: "确定要重置选中的用户密码吗？" }).on(function (e) {
+	                if (!e) {
+	                    return;
+	                }
+	                var subDatas = [];
+					for(var i=0;i<row.length;i++){
+						var subData = {};
+						subData["userId"] = row[i].userId;
+						subDatas.push(subData);
+					}
+					//提交数据
+					$.ajax({ 
+						url:"/restPas", 
+						type:"POST", 
+						dataType:"json", 
+						data:JSON.stringify(subDatas),
+						contentType: 'application/json; charset=UTF-8',
+						success:function(result){
+							if(result.code == "success"){
+								toastr.success('重置成功');
+								$('#mytab').bootstrapTable('refresh', {
+									url : '/getUserListPage'
+								})
+							} else if(result.code == "error"){
+								toastr.error('"重置失败');
+							}
+						} 
+					});
+	            });
+			} else {
+				toastr.warning('请选择重置的数据');
+			}
+			/*]]>*/
+		});
+	})
+	
+	//数据重置
+	function restData(){
+		$("#userName").val("");
+		$("#tel").val("");
+		$("#roleNo").val("");
+		$("#realName").val("");
+	}
+</script>
+
+<body>
+	<div class="panel panel-default">
+	    <div class="panel-heading">
+		    <span>查询条件</span>
+		    <label style="cursor:pointer;width:94%;text-align:right" id="condition">▲</label>
+	    </div>
+	    <div class="panel-body form-group" style="margin-bottom:-10px" id="conArea">
+	        <label class="col-sm-1 control-label" style="text-align: right; margin-top:5px">账户</label>
+	        <div class="col-sm-2">
+	            <input type="text" class="form-control" name="Name" id="search_name"/>
+	        </div>
+	     </div>
+	</div>
+	<div style="margin-button:20px">
+		<div style="margin-left: 10px" id="buttonArea">
+<!--             <button class="btn btn-primary" id="search_btn" name="btnSearch" style="margin-bottom: 10px;margin-top: -10px;">查询</button> -->
+<!--             <button class="btn btn-primary" id="add_btn" name="btnAdd" style="margin-bottom: 10px;margin-top: -10px;" data-toggle="modal">新增</button> -->
+<!--             <button class="btn btn-primary" id="edit_btn" name="btnEdit" style="margin-bottom: 10px;margin-top: -10px;" data-toggle="modal">编辑</button> -->
+<!--             <button class="btn btn-primary" id="del_btn" name="btnDel" style="margin-bottom: 10px;margin-top: -10px;">删除</button> -->
+        </div>
+	</div>
+	<table id="mytab" class="table table-hover"></table>
+	
+	<!-- 新增/编辑（Modal） -->
+	<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-hidden="true">
+						&times;
+					</button>
+					<h4 class="modal-title" id="myModalLabel">
+						<span id="title"></span>
+					</h4>
+				</div>
+				<div class="modal-body">
+					<div>
+						<span class="spancss">账&nbsp;&nbsp;&nbsp;户<span class="sa">*</span></span>
+				        <input type="text" class="form-control" name="userName" id="userName" maxlength="10"/>
+				        <span class="spancss">用户名<span class="sa">*</span></span>
+				        <input type="text" class="form-control" name="realName" id="realName" maxlength="10"/>
+			        </div>
+			        <div>
+				        <span class="spancss">角&nbsp;&nbsp;&nbsp;色<span class="sa">*</span></span>
+				        <select class="form-control" id="roleNo">
+							<option value="">请选择</option>
+						</select>
+						<span class="spancss">手&nbsp;&nbsp;&nbsp;机<span class="sa">&nbsp;</span></span>
+				        <input type="text" class="form-control" name="tel" id="tel" onkeyup="this.value=this.value.replace(/\D/g,'')" maxlength="11"/>
+			        </div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">关闭
+					</button>
+					<button type="button" class="btn btn-primary" id="submit">
+						提交
+					</button>
+				</div>
+			</div><!-- /.modal-content -->
+		</div><!-- /.modal -->
+	</div>
+</body>
+</html>

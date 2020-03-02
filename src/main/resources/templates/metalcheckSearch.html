@@ -1,0 +1,143 @@
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"></meta>
+    <title>BaggingSearch</title>
+    <script src="js/jquery-3.2.1.min.js"></script>
+   <script src="js/laydate/laydate.js"  charset="UTF-8"></script>
+   <script src="js/jquery.page.js"  charset="UTF-8"></script>
+   <link rel="stylesheet" type="text/css" href="css/jquery.page.css" />
+   <script th:inline="javascript">
+
+	//执行一个laydate实例
+	$(document).ready(function(){
+		lay('.form-date-control').each(function(){
+			  laydate.render({
+			    elem: this
+			    ,trigger: 'click'
+			  });
+			}); 
+		var totPages=[[${totalPage}]];
+		var currPage=[[${currPage}]];
+		$("#page").Page({
+			  totalPages: totPages,//分页总数
+			  liNums: 9,//分页的数字按钮数(建议取奇数)
+			  activeClass: 'activP', //active 类样式定义
+			  activePage:currPage,
+			  url:'metalcheckSearchPage',
+			  callBack : function(page){
+			  }
+			  
+		  });
+		
+		 $("table#dataTable tr:even").css("background-color", "#CFEFFC");
+		 $("table#dataTable tr:nth-child(1)").css("background-color", " #66FFCC");
+		
+  });
+	
+</script>
+
+</head>
+<body style="width:98.5%;height:99%;overflow:auto;background-color:whitesmoke;margin: 0 auto">
+    <form id="form" class="form-horizontal" role="form" action="#" th:action="@{/metalcheckSearchQuery?currPage=1}" method="post">
+     <div class="left" style="width:15%;float:left">
+     <div id="nav" style="margin-top:30px;text-align:center">
+        <ul style="list-style-type: none;">
+            <li style="padding:15px;"><a  href="/baggingSearch" style="color: #000000; font-size:18px;">包装查询</a></li>
+            <li style="background-color:aquamarine;padding:15px;" ><a href="/metalcheckSearch" style="color: #000000;font-size:18px;">检针查询</a></li>
+        </ul>
+    </div>
+     </div>
+        <div class="container" style="width:84%;float:left;margin-top:30px">
+            <div class="content_header" style="margin-bottom:20px;padding-left:20px;width:98%" th:each="TMetalcheck : ${searchdata}">
+                <table style="width: 100%;">
+                    <tr style="line-height: 30px;">
+                        <td style="width: 9%; text-align: right">
+                            <label for="orderNo">PO单号</label></td>
+                        <td style="width: 18%; text-align: left">
+                            <input type="text" autocomplete="off" th:value="${TMetalcheck.orderNo}" class="form-control" name="orderNo" style="height: 28px;width: 190px"></input></td>
+                        <td style="width: 9%; text-align: right">
+                            <label for="productOrderNo">生产单号</label></td>
+                        <td style="width: 18%; text-align: left">
+                            <input type="text" autocomplete="off" th:value="${TMetalcheck.productOrderNo}" class="form-control" name="productOrderNo" style="height: 28px;width: 190px"></input></td>
+                        <td style="width: 6%; text-align: right">
+                            <label for="skuCode">SKU</label></td>
+                        <td style="width: 18%; text-align: left">
+                            <input type="text" autocomplete="off" th:value="${TMetalcheck.skuCode}" class="form-control" name="skuCode" style="height: 28px;width: 190px"></input></td>
+                        <td colspan="3" style="text-align:center">
+                          <div style="position:absolute;height:120px;width:100px;padding-left:100px"> 
+                              <button type="submit" class="btn btn-primary" id="btn" style="margin:2px; width:80px; height:65px; font-family: 微软雅黑; font-size: 20px; padding-left:10px">查询</button></div></td>
+                    </tr>
+                    <tr>
+                        <td style="width: 7%; text-align: right">
+                            <label for="sampleCode">款号 </label>
+                           
+                            </td>
+                        <td style="width: 13%; text-align: left">
+                            <input type="text" autocomplete="off" th:valuet="${TMetalcheck.sampleCode}" class="form-control" name="sampleCode" style="height: 28px;width: 190px"></input></td>
+                        <td style="width: 7%; text-align: right">
+                            <label for="size">尺码</label></td>
+                        <td style="width: 13%;  text-align: left">
+                            <input type="text" autocomplete="off" th:value="${TMetalcheck.size}" class="form-control" name="size" style="height: 28px;width: 190px"></input></td>
+                        <td style="width: 4%;  text-align: right">
+                            <label for="color">颜色</label></td>
+                        <td style="width: 13%; text-align: left">
+                            <input type="text" autocomplete="off" th:value="${TMetalcheck.color}" class="form-control" name="color" style="height: 28px;width: 190px"></input></td>
+                    </tr>
+                    <tr>
+                        <td style="width: 7%; text-align: right">
+                            <label for="baggingAddress">检针产线</label></td>
+                        <td style="width: 13%; text-align: left">
+                            <select name="baggingAddress" style="height: 28px;width: 190px">
+                            <option value=""> -- 请选择 -- </option>
+                            <option  th:selected="${searchdata.baggingAddress eq c.id}" th:each="c:${ddldata}"  th:value="${c.id}" th:text="${c.dicValue}"></option>
+                        </select>
+                            </td>
+                        <td style="width: 7%; text-align: right">
+                            <label for="createTimeStart">检针时间</label></td>
+                        <td style="width: 13%;  text-align: left">
+                            <input type="text" autocomplete="off"  readonly="readonly" th:value="${TMetalcheck.createTimeStart}"  class="form-date-control" name="createTimeStart" style="height: 28px;width: 190px"></input></td>
+                        <td style="width: 4%; text-align: right">
+                            <label for="createTimeEnd">至</label></td>
+                        <td style="width: 13%; text-align: left">
+                            <input type="text" autocomplete="off"  readonly="readonly" th:value="${TMetalcheck.createTimeEnd}"  class="form-date-control" name="createTimeEnd" style="height: 28px;width: 190px"></input></td>
+                    </tr>
+                </table>
+            </div>
+            <div class="content_body" style="min-height: 400px;margin-left:20px;width:1100px">
+            <div style="min-height: 350px;width:100%">
+                <table id="dataTable"  name="dataTable" style="border-style: solid; border-width: 1px; border-color: inherit;" border="0" cellpadding="0" cellspacing="0">
+                    <tr style="background-color: #66FFCC; font-family: 微软雅黑; font-size: 16px;">
+                        <th style="width: 140px;border:none; line-height:40px">PO单号</th>
+                        <th style="width: 110px;border:none;">国家</th>
+                        <th style="width: 100px">生产单号</th>
+                        <th style="width: 130px">SKU</th>
+                        <th style="width: 110px">款号</th>
+                        <th style="width: 110px">颜色</th>
+                        <th style="width: 100px">尺寸</th>
+                        <th style="width: 100px">花型</th>
+                        <th style="width: 80px">订单数</th>
+                        <th style="width: 80px">已入库数</th>
+                    </tr>
+                    <tr th:each="MetalCheck : ${data}" >
+                        <th th:text="${MetalCheck.orderNo}" style="line-height:30px"></th>
+                        <th th:text="${MetalCheck.businessUnit}"></th>
+                        <th th:text="${MetalCheck.productOrderNo}"></th>
+                        <th th:text="${MetalCheck.skuCode}"></th>
+                        <th th:text="${MetalCheck.sampleCode}"></th>
+                        <th th:text="${MetalCheck.color}"></th>
+                        <th th:text="${MetalCheck.size}"></th>
+                        <th th:text="${MetalCheck.patternDimensionCode}"></th>
+                        <th th:text="${MetalCheck.orderQty_Pcs.intValue()}"></th>
+                        <th th:text="${MetalCheck.scanNum}"></th>
+                    </tr>
+                </table>
+                </div>
+                
+                <div style="width: 1000px; text-align: left;margin-top:10px">
+                      <div id="page"></div>
+                </div>
+            </div>
+        </div>
+    </form>
+</body>
+</html>

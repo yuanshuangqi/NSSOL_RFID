@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity3">
+
+<head>
+<meta name="_csrf" th:content="${_csrf.token}" />
+<meta name="_csrf_header" th:content="${_csrf.headerName}" />
+<title>登录</title>
+<link rel="stylesheet" type="text/css" href="css/login.css" />
+</head>
+
+<body class="bodyArea">
+	<div class="loginArea">
+		<form th:action="@{/login}" method="post">
+			<div class="userArea">
+				<input class="inputDate" type="text" placeholder="请输入用户名"
+					name="username" />
+			</div>
+			<div class="passArea">
+				<input class="inputDate" type="password" placeholder="请输入密码"
+					name="password" />
+			</div>
+			<div style="height: 30px">
+				<div th:if="${param.error}">
+					<span style="font-size: 12px; color: red">Invalid username
+						and password.</span>
+				</div>
+
+				<div th:if="${param.logout}">
+					<span style="font-size: 12px; color: red">You have been
+						logged out.</span>
+				</div>
+
+				<div th:if="${#httpServletRequest.remoteUser != null}">
+					<p th:text="${#httpServletRequest.remoteUser}">
+						<span style="font-size: 12px; color: red">sample_user</span>
+					</p>
+				</div>
+			</div>
+			<div>
+				<input type="submit" class="subButton" value="登录" />
+			</div>
+		</form>
+	</div>
+</body>
+</html>

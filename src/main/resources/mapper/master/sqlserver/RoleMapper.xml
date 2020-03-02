@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nssol.dao.master.RoleDao">
+	<resultMap id="BaseResultMap" type="com.nssol.model.Role_Info">
+		<id column="Role_Code" jdbcType="VARCHAR" property="roleCode" />
+		<result column="Role_Name" jdbcType="VARCHAR" property="roleName" />
+		<result column="Creater" jdbcType="VARCHAR" property="creater" />
+		<result column="Create_Time" jdbcType="VARCHAR" property="createTime" />
+		<result column="Modifyer" jdbcType="VARCHAR" property="modifyer" />
+		<result column="Modify_Time" jdbcType="VARCHAR" property="modifyTime" />
+	</resultMap>
+	
+	<!-- 获取list数据  -->
+	<select id="getRoleListPage" parameterType="com.nssol.model.Role_Info" resultMap="BaseResultMap">
+		SELECT  Role_Code,
+				Role_Name,
+			    CONVERT(varchar(10), CreateTime, 120) Create_Time
+		FROM (select *,ROW_NUMBER() OVER(ORDER BY CreateTime desc) as counts from Role_Info) A
+		<include refid="getRoleCondition"/>
+	</select>
+	
+	<!-- 获取list数量  -->
+	<select id="getRoleTotal" parameterType="com.nssol.model.Role_Info" resultType="java.lang.Integer">
+		SELECT Count(1)
+		FROM Role_Info
+		WHERE IsDel=0 
+	          <if test="roleName != null and roleName != ''">
+	              AND Role_Name LIKE CONCAT('%',#{roleName},'%')
+	          </if>
+	</select>
+	
+	<sql id="getRoleCondition">
+		<where>
+			 A.IsDel=0 
+             <if test="roleName != null and roleName != ''">
+                 AND A.Role_Name LIKE CONCAT('%',#{roleName},'%')
+             </if>
+             AND A.counts between #{offset} + 1 and #{limit} * #{page}
+             <!-- 		LIMIT #{offset},#{limit} -->
+		</where>
+	</sql>
+
+	<!-- 新增角色  -->
+	<insert id="insertRole" parameterType="com.nssol.model.Role_Info">
+		INSERT into Role_Info (Role_Code, Role_Name, Creater, CreateTime, Modifyer, ModifyTime)
+		VALUES
+		(#{roleCode,jdbcType=VARCHAR},
+		 #{roleName,jdbcType=VARCHAR},
+		 #{creater,jdbcType=VARCHAR},
+		 getdate(),
+		 #{modifyer,jdbcType=VARCHAR},
+		 getdate())
+	</insert>
+
+	<!-- 判断角色重复 -->
+	<select id="selectRole" parameterType="com.nssol.model.Role_Info" resultType="java.lang.Integer">
+		SELECT Count(1)
+		FROM Role_Info
+		WHERE IsDel=0 
+          <if test="roleName != null and roleName != ''">
+              AND Role_Name = #{roleName}
+          </if>
+	</select>
+
+	<!-- 获取编辑的角色数据 -->
+	<select id="selectRoleEdit" parameterType="com.nssol.model.Role_Info" resultMap="BaseResultMap">
+		SELECT *
+		FROM Role_Info
+		WHERE IsDel=0 
+              AND Role_Code = #{roleCode}
+	</select>
+
+	<!-- 更新角色数据 -->
+	<update id="editRole" parameterType="com.nssol.model.Role_Info">
+		UPDATE Role_Info 
+		SET
+			Role_Name=#{roleName} 
+		WHERE IsDel = 0
+		  AND Role_Code = #{roleCode}
+	</update>
+	
+	<!-- 删除角色数据 -->
+<!-- 	<delete id="delRole"  parameterType = "java.util.List"> -->
+<!-- 	     DELETE FROM Role_Info where Role_Code in -->
+<!-- 		 <foreach collection="list"  item="item" open="(" separator="," close=")"> -->
+<!-- 		      #{item.roleCode} -->
+<!-- 	     </foreach> -->
+<!-- 	</delete> -->
+	
+	<update id="delRole"  parameterType = "java.util.List">
+		<foreach collection="list" item="item" index="index" open="" close="" separator=";">
+	        UPDATE Role_Info
+	        <set>
+	          	IsDel = 1
+	        </set>
+	        WHERE Role_Code = #{item.roleCode}
+	    </foreach>
+	</update>
+	
+	<!-- 获取最外层  -->
+	<select id="getModule" resultType="com.nssol.model.Module_Info">
+		SELECT Module_No moduleNo,
+			   Module_Name moduleName
+	    FROM Module_Info
+	    ORDER BY Display_Order
+	</select>
+	
+	<!-- 获取第二层权限  -->
+	<select id="getPage" resultType="com.nssol.model.Page_Info">
+		SELECT b.Page_No pageNo,
+			   b.Page_Name pageName,
+			   case 
+			   when(b.Page_No in (SELECT FK_Page_No
+								  FROM Role_Resource
+								  WHERE FK_Role_Code = #{roleCode}))
+			   then 'true'
+			   else 'false' 
+			   end as isPagecheck
+		FROM Module_Page a
+		INNER JOIN Page_Info b ON a.FK_Page_No = b.Page_No
+		WHERE a.FK_Module_No = #{moduleNo}
+		ORDER BY b.Display_On_Menu
+	</select>
+	
+	<!-- 获取第三层权限  -->
+	<select id="getFunction" resultType="com.nssol.model.Function_Info">
+		SELECT b.Function_No functionNo,
+			   b.Function_Name functionName,
+			   case 
+			   when(b.Function_No in (SELECT FK_Function_No
+								 FROM Role_Resource
+								 WHERE FK_Role_Code = #{roleCode} 
+								 AND FK_Page_No = #{pageNo}))
+			   then 'true'
+			   else 'false' 
+			   end as isFunctioncheck
+		FROM Page_Function a
+		INNER JOIN Function_Info b ON a.FK_Function_No = b.Function_No
+		WHERE a.FK_Page_No = #{pageNo}
+	</select>
+	
+	<!-- 角色上是否有数据用户  -->
+	<select id="selRoleCount" parameterType = "java.util.List" resultType="java.lang.Integer">
+		SELECT Count(1)
+		FROM T_USER
+		WHERE FK_RoleCode in
+            <foreach collection="list" item="item" index="index" open="("  separator="," close=")">
+				#{item.roleCode}
+            </foreach>
+	</select>
+	
+	<!-- 删除用户权限数据 -->
+	<delete id="delRoleRes">
+	     DELETE FROM Role_Resource 
+	     where FK_Role_Code = #{roleCode}
+	</delete>
+	
+	<!-- 添加用户权限数据 -->
+	<insert id="insertRoleRes" parameterType="com.nssol.model.Role_Resource">
+		INSERT into Role_Resource (FK_Role_Code, FK_Page_No, FK_Function_No, Creater, CreateTime, Modifyer, ModifyTime)
+		VALUES
+        <foreach collection="list" item="params" index="index"
+               separator=",">
+			(#{params.fkRoleCode,jdbcType=VARCHAR},
+			 #{params.fkPageNo,jdbcType=VARCHAR},
+			 #{params.fkFunctionNo,jdbcType=VARCHAR},
+			 #{params.creater,jdbcType=VARCHAR},
+			 getdate(),
+			 #{params.modifyer,jdbcType=VARCHAR},
+			 getdate())
+		</foreach>
+	</insert>
+	
+	<!-- 通过页面名称权限编码获取页面按钮权限 -->
+	<select id="getRoleFunction" resultType="com.nssol.model.Role_Resource">
+		SELECT FK_Function_No fkFunctionNo
+		FROM Role_Resource
+		WHERE FK_Role_Code = #{roleCode} AND
+			  FK_Page_No = #{pageNo}
+	</select>
+	
+</mapper>

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nssol.dao.cluster.ClusterPoInfoDao">
+	<resultMap id="BaseResultMap" type="com.nssol.model.T_PO_INFO">
+		<id column="OrderNo" jdbcType="VARCHAR" property="orderNo" />
+		<result column="RevisionNo" jdbcType="INTEGER" property="revisionNo" />
+        <result column="Year" jdbcType="INTEGER" property="year" />
+        <result column="PlanningSsn" jdbcType="VARCHAR" property="planningSsn" />
+        <result column="GlobalBusinessUnit" jdbcType="VARCHAR" property="globalBusinessUnit" />
+        <result column="BusinessUnit" jdbcType="VARCHAR" property="businessUnit" />
+        <result column="ItemBrand" jdbcType="VARCHAR" property="itemBrand" />
+        <result column="Department" jdbcType="VARCHAR" property="department" />
+        <result column="DocumentStatus" jdbcType="VARCHAR" property="documentStatus" />
+        <result column="AnsweredStatus" jdbcType="VARCHAR" property="answeredStatus" />
+        <result column="OrderPlanNumber" jdbcType="VARCHAR" property="orderPlanNumber" />
+        <result column="SampleCode" jdbcType="VARCHAR" property="sampleCode" />
+        <result column="ItemCode" jdbcType="VARCHAR" property="itemCode" />
+        <result column="Item" jdbcType="VARCHAR" property="item" />
+        <result column="ManagementFactoryCode" jdbcType="VARCHAR" property="managementFactoryCode" />
+        <result column="ManagementFactory" jdbcType="VARCHAR" property="managementFactory" />
+        <result column="BranchFactoryCode" jdbcType="VARCHAR" property="branchFactoryCode" />
+        <result column="BranchFactory" jdbcType="VARCHAR" property="branchFactory" />
+        <result column="ContractedETD" jdbcType="DATE" property="contractedETD" />
+        <result column="ETAWH" jdbcType="DATE" property="eTAWH" />
+        <result column="IsDel" jdbcType="INTEGER" property="isDel" />
+        <result column="Creater" jdbcType="VARCHAR" property="creater" />
+        <result column="CreateTime" jdbcType="TIMESTAMP" property="createTime" />
+        <result column="Modifyer" jdbcType="VARCHAR" property="modifyer" />
+        <result column="ModifyTime" jdbcType="TIMESTAMP" property="modifyTime" />
+	</resultMap>
+	<select id="selectAll" parameterType="com.nssol.model.T_PO_INFO"
+		resultMap="BaseResultMap">
+		SELECT
+			A.OrderNo,
+			RevisionNo,
+			Year,
+			PlanningSsn,
+			GlobalBusinessUnit,
+			BusinessUnit,
+			ItemBrand,
+			Department,
+			DocumentStatus,
+			AnsweredStatus,
+			OrderPlanNumber,
+			RepresentativeSampleCode AS SampleCode,
+			ItemCode,
+			Item,
+            ManagementFactoryCode,
+            ManagementFactory,
+            BranchFactoryCode,
+            BranchFactory,
+            ContractedETD,
+            ETAWH,
+            A.IsDel,
+            A.Creater,
+            A.CreateTime,
+            A.Modifyer,
+            A.ModifyTime
+		FROM 
+			T_PO_INFO A inner join T_PO_ADD_INFO B
+		ON
+		    A.OrderNo = B.OrderNo
+		WHERE
+            A.CreateTime > (#{0}) or A.ModifyTime > (#{0})
+	</select>
+</mapper>

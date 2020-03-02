@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nssol.dao.master.TMstDictionaryDao">
+	<resultMap id="BaseResultMap" type="com.nssol.model.TMstDictionary">
+		<id column="id" jdbcType="VARCHAR" property="id" />
+		<result column="dicType" jdbcType="VARCHAR" property="dicType" />
+		<result column="dicID" jdbcType="VARCHAR" property="dicId" />
+		<result column="dicValue" jdbcType="VARCHAR" property="dicValue" />
+		<result column="cpuID" jdbcType="VARCHAR" property="cpuID" />
+	</resultMap>
+
+	<sql id="getFun">
+		<where>
+			1=1
+			<if test="dicType != null and dicType != ''">
+				AND DicType =#{dicType}
+			</if>
+			<if test="cpuID != null and cpuID != ''">
+				AND CpuID = #{cpuID}
+			</if>
+		</where>
+	</sql>
+
+	<sql id="setFun">
+		<where>
+			1=1
+			<if test="id != null and id != ''">
+				AND ID =#{id}
+			</if>
+		</where>
+	</sql>
+
+	<select id="getMstDictionary" parameterType="com.nssol.model.TMstDictionary"
+			resultMap="BaseResultMap">
+		select
+		ID,
+		DicType,
+		DicID,
+		DicValue,
+		CpuID
+		FROM
+		T_MST_DICTIONARY
+		<include refid="getFun"/>
+		order by ID,DicType
+	</select>
+
+	<select id="getEnableAddress" parameterType="com.nssol.model.TMstDictionary"
+			resultMap="BaseResultMap">
+		select
+		ID,
+		DicType,
+		DicID,
+		DicValue,
+		CpuID
+		FROM
+		T_MST_DICTIONARY
+		WHERE
+		CpuID = #{cpuID} OR CpuID = '' OR CpuID is null
+		order by ID,DicType
+	</select>
+
+	<update id="setMstDictionary" parameterType="com.nssol.model.TMstDictionary">
+		update
+		T_MST_DICTIONARY
+		SET
+		CpuID = #{cpuID}
+		<include refid="setFun"/>
+	</update>
+	<update id="clearAddress" parameterType="com.nssol.model.TMstDictionary">
+		update
+		T_MST_DICTIONARY
+		SET
+		CpuID = ''
+		WHERE
+		CpuID = #{cpuID}
+	</update>
+</mapper>

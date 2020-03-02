@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nssol.dao.master.TBasicInfoDao">
+	<resultMap id="BaseResultMap" type="com.nssol.model.TBasicInfo">
+		<id column="type" jdbcType="VARCHAR" property="type" />
+		<result column="value" jdbcType="VARCHAR" property="value" />
+	</resultMap>
+	
+	<sql id="getLatelyPo">
+		<where>
+			1=1
+			 <if test="type != null and type != ''">
+                 AND Type =#{type}
+             </if>
+             
+		</where>
+	</sql>
+	
+	<select id="selectByskuCode" parameterType="com.nssol.model.TBasicInfo"
+		resultMap="BaseResultMap">
+		select 
+		    Type,
+		    value
+			FROM 
+			T_Basic_Info
+	<include refid="getLatelyPo"/>
+	 order by Type,CreateTime desc
+	</select>
+
+	<select id="getBasicInfo" parameterType="com.nssol.model.TBasicInfo" resultMap="BaseResultMap">
+		select
+			Type,
+			value
+			FROM
+			T_Basic_Info
+		<include refid="getLatelyPo"/>
+	</select>
+
+	<update id="setBasicInfo" parameterType="com.nssol.model.TBasicInfo">
+		update T_Basic_Info
+		set value = #{value}
+		<include refid="getLatelyPo"/>
+	</update>
+</mapper>

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nssol.dao.master.MasterSetInfoDao">
+	<delete id="deleteSetInfo" parameterType="java.util.List">
+        delete from t_set_info where
+        <foreach item="params" index="index" collection="list" open="(" separator="or" close=")">
+            (DONo = (#{params.dONo,jdbcType=VARCHAR})
+		    AND SetCode = (#{params.setCode,jdbcType=VARCHAR}))
+        </foreach>
+    </delete>
+    
+    <insert id="insertSetInfo" parameterType="java.util.List">
+        insert into t_set_info ( OrderNo
+						        ,DONo
+						        ,SetCode
+						        ,Quantity
+						      	,IsDel
+						      	,Creater
+						      	,CreateTime
+						      	,Modifyer
+						      	,ModifyTime
+						      	,Deleter
+						      	,DeleteTime
+							    ,ImportTime) values
+        <foreach collection="list" item="params" index="index"
+                 separator=",">
+             (#{params.orderNo,jdbcType=VARCHAR},
+              #{params.dONo,jdbcType=VARCHAR},
+              #{params.setCode,jdbcType=VARCHAR},
+              #{params.quantity,jdbcType=INTEGER},
+              #{params.isDel,jdbcType=INTEGER},
+              #{params.creater,jdbcType=VARCHAR},
+              #{params.createTime,jdbcType=TIMESTAMP},
+              #{params.modifyer,jdbcType=VARCHAR},
+              #{params.modifyTime,jdbcType=TIMESTAMP},
+              #{params.deleter,jdbcType=VARCHAR},
+              #{params.deleteTime,jdbcType=TIMESTAMP},
+              #{params.importTime,jdbcType=TIMESTAMP})
+        </foreach>
+    </insert>
+</mapper>

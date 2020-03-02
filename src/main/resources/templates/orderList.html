@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8" />
+    <title>订单查询</title>
+    <script th:src="@{js/jquery-3.2.1.min.js}" charset="UTF-8"></script>
+</head>
+<script th:inline="javascript">
+	$(document).ready(function(){
+		searchEvent()
+	})
+	
+	function searchEvent() {
+// 		var params= [];
+// 		var param = {};
+// 		param["orderNo"] = $("#txtDiscloseName").val();
+// 		params.add(param);
+		
+// 		$.ajax({
+// 	        url: "/orderList?tagging=" + params,
+// 	        type: "POST",
+// 	        dataType: "json",
+// 	        success: function (result) {
+// 	            if (result != null) {
+// 	                //var list = result.UNCheckRecords;    //返回的数据
+// 	            } else {
+	                
+// 	            }
+// 	        }
+// 	    });
+		
+		$.ajax({
+	        url: "/orderList",
+	        type: "POST",
+	        dataType: "json",
+	        success: function (result) {
+	            if (result != null) {
+	                //var list = result.UNCheckRecords;    //返回的数据
+	            } else {
+	                
+	            }
+	        }
+	    });
+	}
+</script>
+<body>
+	<div class="cBody">
+		<div class="layui-form">
+	       <fieldset class="layui-elem-field">
+	          <legend>查询条件</legend>
+	          <div class="layui-form-item" id="poNo" style="margin-bottom: 12px;">
+     			  <div class="layui-body">
+                      <div class="layui-form-item" style="margin-bottom: 3px;">
+                          <label class="layui-form-label">po单号</label>
+                          <div class="layui-input-inline">
+                              <input class="layui-input" style="width:270px;" name="time" type="text" id="txtDiscloseName" autocomplete="off" placeholder=""></input>
+                          </div>                          
+                      </div>
+                  </div>
+	          </div>
+	        </fieldset>
+	    </div>
+<!-- 	    <div class="console" id="container"> -->
+<!--             <div class="container clearfix" style="width:100%;"> -->
+<!--                 <button class="layui-btn layui-btn-sm layui-btn-normal" id="btnSubmit" onclick="searchEvent()">查询</button> -->
+<!--             </div> -->
+<!--             <table class="layui-table" style="table-layout:fixed;word-break:break-all;"> -->
+<!--                 <thead> -->
+<!--                     <tr> -->
+<!--                         <th autocomplete="off" style="width:25px;text-align:center"><input type='checkbox' name="selectall" v-on:click="selectall" /></th> -->
+<!--                         <th>PO单号</th> -->
+<!--                         <th>国家</th> -->
+<!--                         <th>生产单号</th> -->
+<!--                         <th>SKU</th> -->
+<!--                         <th>款号</th> -->
+<!--                         <th>颜色</th> -->
+<!--                         <th>尺寸</th> -->
+<!--                         <th>花型</th> -->
+<!--                         <th>订单数</th> -->
+<!--                         <th>已入库数</th> -->
+<!--                     </tr> -->
+<!--                 </thead> -->
+<!--                 <tbody> -->
+<!--                     <tr th:each="T_Bagging : ${data}" > -->
+<!--                        <th autocomplete="off" style="width:10px;text-align:center"><input type='checkbox' name="check" value="${T_Bagging.ID}" onclick="checkgrid"></th> -->
+<!--                        <th th:text="${T_Bagging.orderNo}" style="line-height:30px"></th> -->
+<!--                        <th th:text="${T_Bagging.businessUnit}"></th> -->
+<!--                        <th th:text="${T_Bagging.productOrderNo}"></th> -->
+<!--                        <th th:text="${T_Bagging.skuCode}"></th> -->
+<!--                        <th th:text="${T_Bagging.sampleCode}"></th> -->
+<!--                        <th th:text="${T_Bagging.color}"></th> -->
+<!--                        <th th:text="${T_Bagging.size}"></th> -->
+<!--                        <th th:text="${T_Bagging.patternDimensionCode}"></th> -->
+<!--                        <th th:text="${T_Bagging.orderQty_Pcs.intValue()}"  ></th> -->
+<!--                        <th th:text="${T_Bagging.scanNum}"></th> -->
+<!--                    </tr> -->
+<!--                 </tbody> -->
+<!--             </table> -->
+<!--             <div id="laypage"></div> -->
+<!--         </div> -->
+	</div>
+</body>
+</html>

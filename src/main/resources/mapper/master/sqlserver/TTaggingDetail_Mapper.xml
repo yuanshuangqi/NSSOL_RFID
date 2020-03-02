@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nssol.dao.master.TTaggingDetailDao">
+
+<resultMap id="BaseResultMap" type="com.nssol.model.TTaggingDetail">
+		<id column="RFID" jdbcType="VARCHAR" property="rfid" />	
+	</resultMap>
+
+<sql id="getBaggingCondition">
+		<where>
+			1=1
+			 <if test="rfid != null and rfid != ''">
+                 AND B.RFID  =#{rfid}
+             </if>
+		</where>
+	</sql>	
+	
+<select id="selectByEpc" parameterType="com.nssol.model.TTaggingDetail"
+		resultMap="BaseResultMap" statementType="CALLABLE">
+		{
+         call P_GET_EPC('Tagging',#{rfid,mode=IN,jdbcType=VARCHAR})
+      	}
+	</select>
+		
+<insert id="insertTaggingDetail" parameterType="com.nssol.model.TTaggingDetail">
+		insert into T_Tagging_Detail (
+		 	OrderNo,
+		    DetailNo,
+		    SKUCode,
+		    TaggingAddress,
+			RFID,
+			Creater,
+			CreateTime
+			)
+		values
+		(#{orderNo,jdbcType=VARCHAR},
+		#{detailNo,jdbcType=VARCHAR},
+		#{skuCode,jdbcType=VARCHAR},
+		#{taggingAddress,jdbcType=VARCHAR},
+		#{rfid,jdbcType=VARCHAR},
+		#{creater,jdbcType=VARCHAR},
+		#{createTime,jdbcType=DATE}) 
+	</insert>
+</mapper>

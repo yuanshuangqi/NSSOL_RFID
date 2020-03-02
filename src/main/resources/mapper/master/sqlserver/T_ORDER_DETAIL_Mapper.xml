@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nssol.dao.master.MasterOrderDetailDao">
+    <delete id="delete" parameterType="java.util.List">
+        delete from t_order_detail where
+        OrderNo IN
+        <foreach collection="list" item="params" index="index" open="(" close=")" separator=",">
+	 		#{params.orderNo,jdbcType=VARCHAR}
+		</foreach>
+    </delete>
+	<insert id="insert" parameterType="java.util.List">
+        insert into t_order_detail ( OrderNo,
+        DetailNo,
+        ColorCode,
+        Color,
+        SizeCode,
+        Size,
+        PatternDimensionCode,
+        SampleCode,
+        ItemCode,
+        Item,
+        SKUCode,
+        SKUCodeForShipping,
+        OrderQty_Pcs,
+        IsDel,
+        Creater,
+        CreateTime,
+        Modifyer,
+        ModifyTime,
+        ImportTime) values
+        <foreach collection="list" item="params" index="index"
+                 separator=",">
+             (#{params.orderNo,jdbcType=VARCHAR},
+              #{params.detailNo,jdbcType=VARCHAR},
+              #{params.colorCode,jdbcType=VARCHAR},
+              #{params.color,jdbcType=VARCHAR},
+              #{params.sizeCode,jdbcType=VARCHAR},
+              #{params.size,jdbcType=VARCHAR},
+              #{params.patternDimensionCode,jdbcType=VARCHAR},
+              #{params.sampleCode,jdbcType=VARCHAR},
+              #{params.itemCode,jdbcType=VARCHAR},
+              #{params.item,jdbcType=VARCHAR},
+              #{params.sKUCode,jdbcType=VARCHAR},
+              #{params.sKUCodeForShipping,jdbcType=VARCHAR},
+              #{params.orderQty_Pcs,jdbcType=DECIMAL},
+              #{params.isDel,jdbcType=INTEGER},
+              #{params.creater,jdbcType=VARCHAR},
+              #{params.createTime,jdbcType=TIMESTAMP},
+              #{params.modifyer,jdbcType=VARCHAR},
+              #{params.modifyTime,jdbcType=TIMESTAMP},
+              #{params.importTime,jdbcType=TIMESTAMP})
+            </foreach>
+    </insert>
+</mapper>

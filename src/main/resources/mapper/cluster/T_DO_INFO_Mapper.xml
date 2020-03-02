@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nssol.dao.cluster.ClusterDoInfoDao">
+	<resultMap id="BaseResultMap" type="com.nssol.model.T_DO_INFO">
+		<id column="OrderNo" jdbcType="VARCHAR" property="orderNo" />
+		<result column="RevisionNo" jdbcType="INTEGER" property="revisionNo" />
+        <result column="DONo" jdbcType="VARCHAR" property="dONo" />
+        <result column="ProductOrderNo" jdbcType="VARCHAR" property="productOrderNo" />
+        <result column="DocumentStatus" jdbcType="VARCHAR" property="documentStatus" />
+        <result column="ItemCode" jdbcType="VARCHAR" property="itemCode" />
+        <result column="Item" jdbcType="VARCHAR" property="item" />
+        <result column="ETAWH" jdbcType="DATE" property="eTAWH" />
+        <result column="TransportationMethod" jdbcType="VARCHAR" property="transportationMethod" />
+        <result column="ShiptoPortCode" jdbcType="VARCHAR" property="shiptoPortCode" />
+        <result column="ShiptoPort" jdbcType="VARCHAR" property="shiptoPort" />
+        <result column="warehouse" jdbcType="VARCHAR" property="warehouse" />
+        <result column="ContractedETD" jdbcType="DATE" property="contractedETD" />
+        <result column="IsDel" jdbcType="INTEGER" property="isDel" />
+        <result column="Creater" jdbcType="VARCHAR" property="creater" />
+        <result column="CreateTime" jdbcType="TIMESTAMP" property="createTime" />
+        <result column="Modifyer" jdbcType="VARCHAR" property="modifyer" />
+        <result column="ModifyTime" jdbcType="TIMESTAMP" property="modifyTime" />
+	</resultMap>
+	<select id="selectAll" parameterType="com.nssol.model.T_PO_INFO"
+		resultMap="BaseResultMap">
+		SELECT
+			B.OrderNo,
+			B.RevisionNo,
+			B.DONo,
+			B.ProductOrderNo,
+			B.DocumentStatus,
+			B.ItemCode,
+			B.Item,
+            B.ETAWH,
+            B.TransportationMethod,
+            B.ShiptoPortCode,
+            B.ShiptoPort,
+            B.Warehouse,
+            B.ContractedETD,
+            B.IsDel,
+            B.Creater,
+            B.CreateTime,
+            B.Modifyer,
+            B.ModifyTime
+		FROM 
+			T_PO_INFO A,T_DO_INFO B
+		WHERE
+		    A.OrderNo = B.OrderNo
+		    AND (A.CreateTime > (#{0}) or A.ModifyTime > (#{0}))
+	</select>
+</mapper>

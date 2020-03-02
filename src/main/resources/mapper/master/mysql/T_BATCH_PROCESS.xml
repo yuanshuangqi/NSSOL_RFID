@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nssol.dao.master.MasterBatchProcessDao">
+    <resultMap id="BaseResultMap" type="com.nssol.model.T_BATCH_PROCESS">
+        <id column="Id" jdbcType="VARCHAR" property="id" />
+        <result column="Process_time" jdbcType="TIMESTAMP" property="process_time" />
+        <result column="Process_flag" jdbcType="INTEGER" property="process_flag" />
+    </resultMap>
+    <select id="getLastTime" parameterType="com.nssol.model.T_BATCH_PROCESS" resultMap="BaseResultMap">
+		SELECT 
+			Process_time,Id,Process_flag
+		FROM
+			T_BATCH_PROCESS
+		WHERE Batch_id = #{arg0}
+		ORDER BY Process_time DESC
+		limit 1
+	</select>
+    <update  id="updateProcessFlag" parameterType="com.nssol.model.T_BATCH_PROCESS">
+        UPDATE T_BATCH_PROCESS
+        SET 
+        Process_flag = #{process_flag},
+        Modifyer = #{modifyer},
+        ModifyTime =  #{modifyTime}
+        WHERE Id = #{id}
+    </update>
+    <insert id="insert" parameterType="com.nssol.model.T_BATCH_PROCESS">
+    insert into T_BATCH_PROCESS ( Id,
+    Batch_id,
+    Process_flag,
+    Process_time,
+    Creater,
+    CreateTime,
+    Modifyer,
+    ModifyTime,
+    IsDel
+   ) values(
+             #{id},
+             #{batch_id},
+             #{process_flag},
+             #{process_time},
+             #{creater},
+             #{createTime},
+             #{modifyer},
+             #{modifyTime},
+             #{isDel}
+   )
+    </insert>
+</mapper>

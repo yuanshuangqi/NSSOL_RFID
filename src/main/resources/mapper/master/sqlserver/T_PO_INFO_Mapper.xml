@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nssol.dao.master.MasterPoInfoDao">
+    <delete id="delete" parameterType="java.util.List">
+        delete from t_po_info where orderNo in (
+        <foreach collection="list" item="params" index="index" separator=",">
+            #{params.orderNo,jdbcType=VARCHAR}
+        </foreach>
+        )
+    </delete>
+	<insert id="insert" parameterType="java.util.List">
+        insert into t_po_info ( OrderNo, RevisionNo, Year, PlanningSsn, GlobalBusinessUnit, BusinessUnit, ItemBrand, Department, DocumentStatus, AnsweredStatus, OrderPlanNumber, SampleCode, ItemCode, Item, ManagementFactoryCode, ManagementFactory, BranchFactoryCode, BranchFactory, ContractedETD, ETAWH, IsDel, Creater, CreateTime, Modifyer, ModifyTime,  ImportTime) values
+        <foreach collection="list" item="params" index="index"
+                 separator=",">
+             (#{params.orderNo,jdbcType=VARCHAR}, 
+              #{params.revisionNo,jdbcType=INTEGER},
+              #{params.year,jdbcType=INTEGER},
+              #{params.planningSsn,jdbcType=VARCHAR},
+              #{params.globalBusinessUnit,jdbcType=VARCHAR},
+              #{params.businessUnit,jdbcType=VARCHAR},
+              #{params.itemBrand,jdbcType=VARCHAR},
+              #{params.department,jdbcType=VARCHAR},
+              #{params.documentStatus,jdbcType=VARCHAR},
+              #{params.answeredStatus,jdbcType=VARCHAR},
+              #{params.orderPlanNumber,jdbcType=VARCHAR},
+              #{params.sampleCode,jdbcType=VARCHAR},
+              #{params.itemCode,jdbcType=VARCHAR},
+              #{params.item,jdbcType=VARCHAR},
+              #{params.managementFactoryCode,jdbcType=VARCHAR},
+              #{params.managementFactory,jdbcType=VARCHAR},
+              #{params.branchFactoryCode,jdbcType=VARCHAR},
+              #{params.branchFactory,jdbcType=VARCHAR},
+              #{params.contractedETD,jdbcType=DATE},
+              #{params.eTAWH,jdbcType=DATE},
+              #{params.isDel,jdbcType=INTEGER},
+              #{params.creater,jdbcType=VARCHAR},
+              #{params.createTime,jdbcType=TIMESTAMP},
+              #{params.modifyer,jdbcType=VARCHAR},
+              #{params.modifyTime,jdbcType=TIMESTAMP},
+              #{params.importTime,jdbcType=TIMESTAMP})
+            </foreach>
+    </insert>
+</mapper>

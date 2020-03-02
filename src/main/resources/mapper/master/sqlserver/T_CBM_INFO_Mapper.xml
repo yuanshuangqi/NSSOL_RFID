@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nssol.dao.master.MasterCBMInfoDao">
+    <delete id="delete" parameterType="java.util.List">
+        delete from T_CBM_INFO WHERE
+        <foreach item="params" index="index" collection="list" open="(" separator="or" close=")">
+            (OrderNo = (#{params.orderNo,jdbcType=VARCHAR})
+		    AND SetCode = (#{params.setCode,jdbcType=VARCHAR}))
+        </foreach>
+    </delete>
+	<insert id="insert" parameterType="java.util.List">
+        insert into T_CBM_INFO ( [TransactionID]
+							      ,[InterfaceCode]
+							      ,[OrderNo]
+							      ,[SetCode]
+							      ,[TypeCode]
+							      ,[PackType]
+							      ,[CartonLength]
+							      ,[CartonWidth]
+							      ,[CartonHeight]
+							      ,[Volume]
+							      ,[NetWeight]
+							      ,[GrossWeight]
+							      ,[ActualWeight]
+							      ,[CreateDate]
+							      ,[Creater]
+							      ,[CreateTime]
+							      ,[Modifyer]
+							      ,[ModifyTime]
+							      ,[ImportTime]) values
+        <foreach collection="list" item="params" index="index"
+                 separator=",">
+             (#{params.transactionID,jdbcType=VARCHAR}, 
+              #{params.interfaceCode,jdbcType=VARCHAR},
+              #{params.orderNo,jdbcType=VARCHAR},
+              #{params.setCode,jdbcType=VARCHAR},
+              #{params.typeCode,jdbcType=VARCHAR},
+              #{params.packType,jdbcType=VARCHAR},
+              #{params.cartonLength,jdbcType=FLOAT},
+              #{params.cartonWidth,jdbcType=FLOAT},
+              #{params.cartonHeight,jdbcType=FLOAT},
+              #{params.volume,jdbcType=FLOAT},
+              #{params.netWeight,jdbcType=FLOAT},
+              #{params.grossWeight,jdbcType=FLOAT},
+              #{params.actualWeight,jdbcType=FLOAT},
+              #{params.createDate,jdbcType=TIMESTAMP},
+              #{params.creater,jdbcType=VARCHAR},
+              #{params.createTime,jdbcType=TIMESTAMP},
+              #{params.modifyer,jdbcType=VARCHAR},
+              #{params.modifyTime,jdbcType=TIMESTAMP},
+              #{params.importTime,jdbcType=TIMESTAMP})
+            </foreach>
+    </insert>
+</mapper>

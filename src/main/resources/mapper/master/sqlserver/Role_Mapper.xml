@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nssol.dao.master.RoleDao">
+	<insert id="save" parameterType="com.nssol.web.system.model.RoleInfo">
+		INSERT INTO M_ROLE
+		(ParentId,
+		RoleCode,
+		RoleDesc,
+		RoleName,
+		isdel,
+		creater,
+		createtime,
+		modifyer,
+		modifytime)
+		values
+		(
+		#{parentId},
+		#{roleCode},
+		#{roleDesc},
+		#{roleName},
+		#{isDel},
+		#{creater},
+		#{createTime},
+		#{modifyer},
+		#{modifyTime})
+	</insert>
+
+	<select id="findRole" parameterType="com.nssol.web.system.controller.role.RoleRequest"
+			resultType="com.nssol.web.system.model.RoleInfo">
+		SELECT
+		id AS id,
+		rolecode AS roleCode,
+		rolename AS roleName,
+		RoleDesc AS roleDesc,
+		ParentId AS parentId,
+		creater AS creater,
+		isdel AS isDel,
+		createtime AS createTime,
+		modifytime AS modifyTime,
+		modifyer AS modifyer
+		FROM M_ROLE
+		WHERE
+		1=1
+		<if test="roleName != null and roleName != ''">
+			AND( RoleCode LIKE CONCAT('%',#{roleName},'%')
+			OR RoleName LIKE CONCAT('%',#{roleName},'%'))
+		</if>
+
+	</select>
+
+	<select id="findMenuList" parameterType="java.lang.Long"
+			resultType="com.nssol.web.system.model.MenuInfo">
+
+		SELECT
+		mm.id AS id,
+		mm.icon AS icon,
+		mm.menucode AS menuCode,
+		mm.menuname AS menuName,
+		mm.ismenuorbtn AS menuOrBtn,
+		mm.parentid AS parentId,
+		mm.url AS url,
+		mm.creater AS creater,
+		mm.isdel AS isDel,
+		mm.createtime AS createTime,
+		mm.modifytime AS modifyTime,
+		mm.modifyer AS modifyer
+		FROM M_ROLE_MENU mrm INNER JOIN M_MENU mm
+		ON mrm.MenuId = mm.id
+		WHERE mrm.RoleId = #{id}
+	</select>
+
+	<delete id="deleteRole" parameterType="java.lang.Long">
+		DELETE
+		FROM M_Role
+		WHERE id = #{id} OR ParentId = #{id}
+	</delete>
+
+	<delete id="deleteUserRole">
+		DELETE a
+		FROM M_USER_ROLE  a
+		LEFT JOIN M_ROLE b
+		ON a.RoleId = b.ID
+		WHERE b.ID is null
+	</delete>
+
+	<select id="findByParentId" parameterType="java.lang.Long"
+			resultType="com.nssol.web.system.model.RoleInfo">
+		SELECT
+		id AS id,
+		rolecode AS roleCode,
+		rolename AS roleName,
+		RoleDesc AS roleDesc,
+		ParentId AS parentId,
+		creater AS creater,
+		isdel AS isDel,
+		createtime AS createTime,
+		modifytime AS modifyTime,
+		modifyer AS modifyer
+		FROM M_ROLE
+		WHERE
+		parentid=#{id}
+	</select>
+
+	<update id="update" parameterType="com.nssol.web.system.model.RoleInfo">
+		UPDATE M_ROLE
+		SET ParentId = #{parentId},
+		RoleCode = #{roleCode},
+		RoleDesc = #{roleDesc},
+		RoleName = #{roleName},
+		modifytime = #{modifyTime},
+		modifyer = #{modifyer}
+		WHERE id = #{id}
+	</update>
+
+	<delete id="deleteRoleMenuById" parameterType="java.lang.Integer">
+		DELETE
+		FROM M_ROLE_MENU
+		WHERE RoleId = #{id}
+	</delete>
+
+	<insert id="insertRoleMenu" parameterType="java.util.List">
+	INSERT INTO  M_ROLE_MENU
+	(
+		RoleId,
+		MenuId
+	)VALUES
+	<foreach collection="roleMenuInfoList" index="index" item="roleMenuInfo" separator=","  >
+		(
+		#{roleMenuInfo.roleId},
+		#{roleMenuInfo.menuId}
+		)
+	</foreach>
+	</insert>
+</mapper>
+		

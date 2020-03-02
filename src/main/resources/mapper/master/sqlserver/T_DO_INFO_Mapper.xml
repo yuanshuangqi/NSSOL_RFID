@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nssol.dao.master.MasterDoInfoDao">
+	<delete id="delete" parameterType="java.util.List">
+        delete from t_do_info where
+        <foreach item="params" index="index" collection="list" open="(" separator="or" close=")">
+            DONo=(#{params.dONo,jdbcType=VARCHAR})
+        </foreach>
+
+    </delete>
+    <insert id="insert" parameterType="java.util.List">
+        insert into t_do_info ( OrderNo,
+     RevisionNo,
+     DONo,
+     ProductOrderNo,
+     DocumentStatus,
+     ItemCode,
+     Item,
+     ETAWH,
+     TransportationMethod,
+     ShiptoPortCode,
+     ShiptoPort,
+     Warehouse,
+     ContractedETD,
+     IsDel,
+     Creater,
+     CreateTime,
+     Modifyer,
+     ModifyTime,
+     ImportTime) values
+        <foreach collection="list" item="params" index="index"
+                 separator=",">
+             (#{params.orderNo,jdbcType=VARCHAR},
+              #{params.revisionNo,jdbcType=INTEGER},
+              #{params.dONo,jdbcType=VARCHAR},
+              #{params.productOrderNo,jdbcType=VARCHAR},
+              #{params.documentStatus,jdbcType=VARCHAR},
+              #{params.itemCode,jdbcType=VARCHAR},
+              #{params.item,jdbcType=VARCHAR},
+              #{params.eTAWH,jdbcType=DATE},
+              #{params.transportationMethod,jdbcType=VARCHAR},
+              #{params.shiptoPortCode,jdbcType=VARCHAR},
+              #{params.shiptoPort,jdbcType=VARCHAR},
+              #{params.warehouse,jdbcType=VARCHAR},
+              #{params.contractedETD,jdbcType=DATE},
+              #{params.isDel,jdbcType=INTEGER},
+              #{params.creater,jdbcType=VARCHAR},
+              #{params.createTime,jdbcType=TIMESTAMP},
+              #{params.modifyer,jdbcType=VARCHAR},
+              #{params.modifyTime,jdbcType=TIMESTAMP},
+              #{params.importTime,jdbcType=TIMESTAMP})
+            </foreach>
+    </insert>
+</mapper>

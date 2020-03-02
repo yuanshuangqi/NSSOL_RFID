@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nssol.dao.master.TMetalcheckDetailDao">
+
+<resultMap id="BaseResultMap" type="com.nssol.model.TMetalcheckDetail">
+		<id column="RFID" jdbcType="VARCHAR" property="rfid" />	
+	</resultMap>
+
+<sql id="getBaggingCondition">
+		<where>
+			1=1
+			 <if test="rfid != null and rfid != ''">
+                 AND B.RFID  =#{rfid}
+             </if>
+		</where>
+	</sql>	
+	
+<select id="selectByEpc" parameterType="com.nssol.model.TMetalcheckDetail"
+		resultMap="BaseResultMap" statementType="CALLABLE">
+		{
+         call P_GET_EPC('Metalcheck',#{rfid,mode=IN,jdbcType=VARCHAR})
+      	}
+	</select>
+		
+<insert id="insertMetalcheckDetail" parameterType="com.nssol.model.TMetalcheckDetail">
+		insert into T_Metalcheck_DETAIL (
+		 	OrderNo,
+		    DetailNo,
+		    SKUCode,
+		    BaggingAddress,
+			RFID,
+			Sensitivity,
+			Creater,
+			CreateTime
+			)
+		values
+		(#{orderNo},
+		#{detailNo},
+		#{skuCode},
+		#{baggingAddress},
+		#{rfid},
+		#{sensitivity},
+		#{creater},
+		#{createTime})
+	</insert>
+</mapper>

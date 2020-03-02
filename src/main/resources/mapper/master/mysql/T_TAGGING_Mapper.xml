@@ -1,0 +1,307 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nssol.dao.master.TTaggingDao">
+	<resultMap id="BaseResultMap" type="com.nssol.model.T_Tagging">
+		<id column="orderNo" jdbcType="VARCHAR" property="orderNo" />
+		<result column="SKUCode" jdbcType="VARCHAR" property="skuCode" />
+		<result column="SampleCode" jdbcType="VARCHAR" property="sampleCode" />
+		<result column="Color" jdbcType="VARCHAR" property="color" />
+		<result column="Size" jdbcType="VARCHAR" property="size" />
+		<result column="TaggingAddress" jdbcType="VARCHAR" property="taggingAddress" />
+		<result column="CreateTimeStart" jdbcType="VARCHAR" property="createTimeStart" />
+		<result column="CreateTimeEnd" jdbcType="VARCHAR" property="createTimeEnd" />
+		<result column="BusinessUnit" jdbcType="VARCHAR" property="businessUnit" />
+		<result column="ItemBrand" jdbcType="VARCHAR" property="itemBrand" />
+		<result column="OrderQty_Pcs" jdbcType="DECIMAL" property="orderQty_Pcs" />
+		<result column="ScanNum" jdbcType="VARCHAR" property="scanNum" />
+		<result column="RecordCounts" jdbcType="VARCHAR" property="recordCounts" />
+		<result column="UserID" jdbcType="VARCHAR" property="userID" />
+		<result column="UserName" jdbcType="VARCHAR" property="userName" />
+		<result column="ICCard" jdbcType="VARCHAR" property="iCCard" />
+	</resultMap>
+	
+	<sql id="getTaggingCondition">
+		<where>
+			1=1
+			 <if test="orderNo != null and orderNo != ''">
+                 AND B.OrderNo LIKE CONCAT('%',#{orderNo},'%')
+             </if>
+            <if test="userID != null and userID != ''">
+                 AND B.userID=#{userID} 
+             </if>
+              <if test="skuCode != null and skuCode != ''">
+                 AND B.SKUCode LIKE CONCAT('%',#{skuCode},'%')
+             </if>
+              <if test="sampleCode != null and sampleCode != ''">
+                 AND B.SampleCode LIKE CONCAT('%',#{sampleCode},'%')
+             </if>
+              <if test="size != null and size != ''">
+                 AND CONCAT(B.SizeCode,':',B.Size) LIKE CONCAT('%',#{size},'%')
+             </if>
+              <if test="color != null and color != ''">
+                 AND CONCAT(B.ColorCode,':',B.Color) LIKE CONCAT('%',#{color},'%')
+             </if>
+              <if test="createTimeStart != null and createTimeStart != ''">
+                 AND DATE_FORMAT(B.CreateTime,"%Y%m%d") >= #{createTimeStart}
+             </if>
+           
+              <if test="taggingAddress != null and taggingAddress != ''">
+                 AND B.TaggingAddress = #{taggingAddress}
+             </if>
+            
+                <if test="createTimeEnd != null and createTimeEnd != ''">
+                 AND  #{createTimeEnd} >= DATE_FORMAT(B.CreateTime,"%Y%m%d")
+             </if>
+               <if test="scanTime != null">
+                 AND DATE_FORMAT(B.scanTime,"%Y%m%d") = DATE_FORMAT(NOW(),"%Y%m%d")
+             </if>
+		</where>
+	</sql>
+	
+	<select id="selectByCriteria" parameterType="com.nssol.model.T_Tagging"
+		resultMap="BaseResultMap">
+		SELECT
+			B.OrderNo,
+			B.DetailNo,
+			B.ColorCode,
+			B.Color,
+			B.SizeCode,
+			B.Size,
+			B.PatternDimensionCode,
+			B.SampleCode,
+			P.ItemBrand,
+			B.ItemCode,
+			B.Item,
+			B.SKUCode,
+			B.SKUCodeForShipping,
+			B.TaggingAddress,
+			P.BusinessUnit,
+			B.ScanNum,
+			N.OrderQty_Pcs,
+			(SELECT DATE_FORMAT(MIN(C.CreateTime),"%Y-%m-%d %H:%i:%S")
+			 FROM T_Tagging C
+			 WHERE C.SkuCode=B.SkuCode AND C.OrderNo=B.OrderNo) CreateTimeStart,
+			DATE_FORMAT(now(),"%Y-%m-%d %H:%i:%S") CreateTimeEnd
+		FROM 
+			T_Tagging B
+		INNER JOIN  
+			T_PO_INFO P
+		on P.OrderNo=B.OrderNo
+		INNER JOIN  
+			T_ORDER_Detail N
+		on N.OrderNo=B.OrderNo
+		and N.SKUCode=B.SKUCode
+		<include refid="getTaggingCondition"/>
+		
+	</select>
+	
+	<select id="selectIdBysku" parameterType="com.nssol.model.T_Tagging"
+		resultMap="BaseResultMap">
+		SELECT
+		    B.DetailNo
+		FROM 
+			T_Tagging B
+		<include refid="getTaggingCondition"/>
+		limit 1
+	</select>
+	
+	<select id="selectTagginglist" parameterType="com.nssol.model.T_Tagging"
+		resultMap="BaseResultMap">
+       SELECT * FROM (
+		SELECT
+		(SELECT group_concat(I.ProductOrderNo separator '/')
+		FROM      T_DO_INFO I
+		WHERE     I.OrderNo=B.OrderNo) ProductOrderNo,
+			B.OrderNo,
+			B.ColorCode,
+			CONCAT(B.ColorCode,':',B.Color) Color,
+			B.SizeCode,
+		    CONCAT(B.SizeCode,':',B.Size) Size,
+			B.PatternDimensionCode,
+			B.SampleCode,
+			B.ItemCode,
+			B.Item,
+			B.SKUCode,
+			B.SKUCodeForShipping,
+			P.BusinessUnit,
+			N.OrderQty_Pcs,
+			SUM(B.ScanNum) ScanNum,
+			T.UserId,
+			T.UserName
+		FROM 
+			T_Tagging B
+		INNER JOIN  
+			T_PO_INFO P
+		on P.OrderNo=B.OrderNo
+		INNER JOIN  
+			T_ORDER_Detail N
+		 on N.OrderNo=B.OrderNo
+		and N.SKUCode=B.SKUCode
+				LEFT join T_USER T
+		 on B.UserID=T.UserId 
+		<include refid="getTaggingCondition"/>
+		
+		group by
+			B.OrderNo,
+			B.ColorCode,
+			B.Color,
+			B.SizeCode,
+			B.Size,
+			B.PatternDimensionCode,
+			B.SampleCode,
+			B.ItemCode,
+			B.Item,
+			B.SKUCode,
+			B.SKUCodeForShipping,
+			N.OrderQty_Pcs,
+			P.BusinessUnit,
+			T.UserId,
+			T.UserName
+		 ) B
+		order by B.OrderNo DESC
+		limit #{startRecord},#{currentPageShowCounts}
+		
+	</select>
+	
+	<select id="selectTotTagginglist" parameterType="com.nssol.model.T_Tagging"
+		resultMap="BaseResultMap">
+     
+		SELECT
+		(SELECT group_concat(I.ProductOrderNo separator '/')
+		FROM      T_DO_INFO I
+		WHERE     I.OrderNo=B.OrderNo) ProductOrderNo,
+			B.OrderNo,
+			B.ColorCode,
+            CONCAT(B.ColorCode,':',B.Color) Color,
+			B.SizeCode,
+            CONCAT(B.SizeCode,':',B.Size) Size,
+			B.PatternDimensionCode,
+			B.SampleCode,
+			B.ItemCode,
+			B.Item,
+			B.SKUCode,
+			B.SKUCodeForShipping,
+			N.OrderQty_Pcs,
+			P.BusinessUnit,
+			SUM(B.ScanNum) ScanNum,
+		  T.UserID,
+		  T.UserName
+		FROM 
+			T_Tagging B
+		INNER JOIN  
+			T_PO_INFO P
+		on P.OrderNo=B.OrderNo
+		INNER JOIN  
+			T_ORDER_Detail N
+		 on N.OrderNo=B.OrderNo
+		and N.SKUCode=B.SKUCode
+		LEFT JOIN  
+			T_USER T
+		on B.UserID=T.UserID
+		<include refid="getTaggingCondition"/>
+		
+		group by
+			B.OrderNo,
+			B.ColorCode,
+			B.Color,
+			B.SizeCode,
+			B.Size,
+			B.PatternDimensionCode,
+			B.SampleCode,
+			B.ItemCode,
+			B.Item,
+			B.SKUCode,
+			B.SKUCodeForShipping,
+			N.OrderQty_Pcs,
+			P.BusinessUnit,
+		  T.UserID,
+		  T.UserName
+	</select>
+	
+	<select id="selectTagginglistCount" parameterType="com.nssol.model.T_Tagging"
+		resultMap="BaseResultMap">
+       	SELECT
+		  B.OrderNo,
+		  B.SkuCode,
+		  T.UserID,
+		  T.UserName
+		FROM 
+			T_Tagging B
+		INNER JOIN  
+			T_PO_INFO P
+		on P.OrderNo=B.OrderNo
+		LEFT JOIN  
+			T_USER T
+		on B.UserID=T.UserID
+		<include refid="getTaggingCondition"/>
+		group by 
+		     B.OrderNo,
+		  B.SkuCode,
+		  T.UserID,
+		  T.UserName
+	</select>
+
+<insert id="insertTagging" parameterType="com.nssol.model.T_Tagging">
+		
+		insert into T_TAGGING (
+				 OrderNo
+				,DetailNo
+				,ColorCode
+				,Color
+				,SizeCode
+				,Size
+				,PatternDimensionCode
+				,SampleCode
+				,ItemCode
+				,Item
+				,SKUCode
+				,SKUCodeForShipping
+				,TaggingAddress
+				,ScanTime
+				,ScanNum
+				,ICCard
+				,UserID
+				,Creater
+				,CreateTime		
+)
+		select 
+			D.OrderNo,
+			D.DetailNo,
+			D.ColorCode,
+			D.Color,
+			D.SizeCode,
+			D.Size,
+			D.PatternDimensionCode,
+			D.SampleCode,
+			D.ItemCode,
+			D.Item,
+			D.SKUCode,
+			D.SKUCodeForShipping,
+			#{taggingAddress},
+			#{scanTime},
+			#{scanNum},
+			#{iCCard},
+			#{creater},
+			#{creater},
+			#{createTime}
+		from 
+			T_ORDER_DETAIL D
+		where
+		     D.OrderNo=#{orderNo}
+    	 AND D.SKUCode =#{skuCode}
+    	 limit 1
+	</insert>
+
+<update id="updateTagging" parameterType="com.nssol.model.T_Tagging">
+		update T_TAGGING 
+		set ScanNum=ScanNum+1,
+		 Modifyer =#{creater},
+		 ModifyTime =#{createTime},
+		 DetailNo =#{detailNo}
+		where
+		     OrderNo =#{orderNo}
+    	 AND SKUCode =#{skuCode}
+    	 AND TaggingAddress =#{taggingAddress}
+    	 AND DATE_FORMAT(ScanTime,"%Y%m%d") =DATE_FORMAT(#{scanTime},"%Y%m%d")
+	</update>
+</mapper>
